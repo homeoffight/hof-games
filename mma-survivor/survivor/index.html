@@ -433,7 +433,46 @@ button.lrow.me:hover{background:#f7ecc8}
 .arow .pk small{display:block;color:var(--muted);font-weight:500}
 .arow .pk.none{color:var(--loss)}
 
-@media (max-width:560px){.hide-s{display:none}}
+/* leaderboard: one row per player, one cell per week (like a pick sheet) */
+.lbwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.lbgrid{display:grid;min-width:max-content;--lead:250px;--cw:96px}
+.lg-head,.lg-row{display:grid;grid-template-columns:var(--lead) repeat(var(--n),var(--cw));align-items:stretch}
+.lg-head{background:var(--surface-2);border-bottom:1px solid var(--line)}
+.lg-head > div{padding:8px 6px;font-size:11.5px;line-height:1.2;font-weight:700;color:var(--muted);text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;align-self:center}
+.lg-head > div.cur{color:var(--ink)}
+.lg-head .lg-lead{display:flex;justify-content:space-between;align-items:center;align-self:stretch;padding-left:14px;padding-right:14px;background:var(--surface-2)}
+button.lg-row{width:100%;text-align:left;font:inherit;color:inherit;background:var(--surface);cursor:pointer;padding:0}
+.lg-row + .lg-row{border-top:1px solid var(--surface-2)}
+.lg-lead{position:sticky;left:0;z-index:1;background:var(--surface);display:grid;grid-template-columns:30px 34px minmax(0,1fr) 30px;gap:8px;align-items:center;padding:8px 10px 8px 12px;border-right:1px solid var(--line)}
+button.lg-row:hover,button.lg-row:hover .lg-lead{background:var(--surface-2)}
+.lg-row.me,.lg-row.me .lg-lead{background:var(--gold-tint)}
+.lg-lead .rk{font-size:19px}
+.lg-lead .lwins{font-size:22px;text-align:right}
+.lbsub{display:block;color:var(--muted);font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell{margin:6px 4px;border-radius:10px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:64px;padding:5px 2px;font-size:10px;font-weight:800;color:var(--ink-2);text-transform:uppercase;overflow:hidden;min-width:0}
+.cell .av{width:34px;height:34px}
+.cell span:not(.av){max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 3px}
+.cell.win{background:var(--win-tint);border-color:#8fd0ab}
+.cell.loss{background:var(--loss-tint);border-color:#eeaaaa}
+.cell.loss .av{filter:grayscale(1)}
+.cell.pend{border-color:var(--gold);background:#fffdf4}
+.cell.hid{border-style:dashed;color:var(--faint)}
+.cell.hid svg{width:16px;height:16px}
+.cell.none{border-style:dashed;background:transparent}
+/* tappable "Make your pick" */
+button.mystatus{width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.mystatus .go{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--loss);color:#fff}
+.mystatus .go svg{width:16px;height:16px}
+button.mystatus.need:hover{border-color:var(--loss)}
+.mystatus .btn{flex:none}
+#card-top{scroll-margin-top:80px}
+.mainlbl{color:var(--gold-ink);font-weight:800}
+/* share dialog */
+.sharewrap{background:#000;border-radius:12px;display:grid;place-items:center;padding:10px}
+.sharewrap img{max-height:58vh;width:auto;max-width:100%}
+.share-acts{display:flex;gap:10px;margin-top:14px}
+.share-acts .btn{flex:1}
+@media (max-width:560px){.hide-s{display:none}.lbgrid{--lead:176px;--cw:70px}.lg-lead{grid-template-columns:24px minmax(0,1fr) 26px;gap:6px;padding-left:10px}.lg-lead .av{display:none}.lg-lead .lwins{font-size:20px}}
 @media (min-width:760px){
   .hl-cut{height:250px}
   .hl-name{font-size:32px}
@@ -519,8 +558,10 @@ const I = {
   picks: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/><path d="M9 12.5l2 2 4-4.5"/></svg>',
   season: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>',
   board: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V11M10 20V5M16 20v-6M22 20H2"/></svg>',
-  rules: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>'
+  rules: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+  share: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13V3M6 7l4-4 4 4M4 11v5h12v-5"/></svg>'
 };
+const TOUCH = matchMedia('(pointer: coarse)').matches;
 const BUST = '<svg viewBox="0 0 200 240" aria-hidden="true"><defs><linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3326"/><stop offset="1" stop-color="#121110"/></linearGradient></defs><circle cx="100" cy="74" r="44" fill="url(#bg1)"/><path d="M14 240c0-64 38-108 86-108s86 44 86 108z" fill="url(#bg1)"/></svg>';
 
 /* ---------- formatting ---------- */
@@ -539,6 +580,12 @@ function eventTitle(ev) {
   const n = ev?.name || '';
   const i = n.indexOf(':');
   return i > -1 ? { pre: n.slice(0, i).trim(), main: n.slice(i + 1).trim() } : { pre: '', main: n };
+}
+// Short column label for an event: "UFC 333" for numbered events, otherwise the headline ("Buckley vs. Malott")
+function eventShort(ev) {
+  const n = ev?.name || '';
+  const m = n.match(/^UFC\s+\d+/i);
+  return m ? m[0].toUpperCase() : (eventTitle(ev).main || n);
 }
 const methodLabel = { KO: 'KO/TKO', SUB: 'submission', DEC: 'decision' };
 const flagCode = (url) => (String(url || '').match(/countries\/500\/([a-z]+)\.png/) || [])[1];
@@ -650,27 +697,25 @@ function SupabaseAPI() {
       const p = chk(await sb.from('profiles').select('id,username,avatar_url').eq('id', user.id).maybeSingle());
       return { user: { id: user.id, email: user.email }, profile: p };
     },
+    // every run (streak) this season and all their picks
     async myEntry(userId, seasonId) {
-      const rows = chk(await sb.from('entries').select('*').eq('user_id', userId).eq('season_id', seasonId).order('entry_no').limit(1));
-      const entry = rows[0] || null;
-      const picks = entry ? chk(await sb.from('picks').select('*, fighter:fighters(*)').eq('entry_id', entry.id)) : [];
-      return { entry, picks };
+      const entries = chk(await sb.from('entries').select('*').eq('user_id', userId).eq('season_id', seasonId).order('entry_no'));
+      const picks = entries.length ? chk(await sb.from('picks').select('*, fighter:fighters(*)').in('entry_id', entries.map((e) => e.id))) : [];
+      return { entries, picks };
     },
     async leaderboard(seasonId, { filter, q, offset = 0, limit = 50, ids = [] }) {
       let qb = sb.from('leaderboard').select('*', { count: 'exact' }).eq('season_id', seasonId);
       if (filter === 'alive') qb = qb.eq('status', 'alive');
       if (filter === 'following') { if (!ids.length) return { rows: [], total: 0 }; qb = qb.in('user_id', ids); }
       if (q) qb = qb.ilike('username', `%${q.replace(/[%_]/g, '')}%`);
-      const { data, error, count } = await qb.order('rank').order('username').range(offset, offset + limit - 1);
+      const { data, error, count } = await qb.order('rank').order('current', { ascending: false }).order('username').range(offset, offset + limit - 1);
       if (error) throw new Error(error.message);
       return { rows: data, total: count ?? data.length };
     },
     async myRank(seasonId, userId) { return chk(await sb.from('leaderboard').select('*').eq('season_id', seasonId).eq('user_id', userId).limit(1))[0] || null; },
     async stats(seasonId) { return chk(await sb.rpc('season_stats', { p_season: seasonId })); },
-    async revealed(eventId, entryIds) {
-      if (!entryIds.length) return [];
-      return chk(await sb.from('picks').select('entry_id, fighter_id, result, fighter:fighters(name,last_name,headshot_url)').eq('event_id', eventId).in('entry_id', entryIds));
-    },
+    async boardPicks(seasonId, userIds) { return userIds.length ? chk(await sb.rpc('board_picks', { p_season: seasonId, p_users: userIds })) : []; },
+    async setPhone(phone) { return chk(await sb.rpc('set_phone', { p_phone: phone })); },
     async pickStats(eventId) { return chk(await sb.rpc('pick_stats', { p_event: eventId })); },
     async signUp(email, password) {
       const { data, error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.origin + location.pathname } });
@@ -697,12 +742,13 @@ function SupabaseAPI() {
     },
     // socials, admin flag and who you follow (tolerant of an older database)
     async extras(userId) {
-      const [socials, isAdmin, following] = await Promise.all([
+      const [socials, isAdmin, following, phone] = await Promise.all([
         sb.from('profile_socials').select('instagram,x_handle,is_public').eq('user_id', userId).maybeSingle().then((r) => r.data || null, () => null),
         sb.rpc('is_admin').then((r) => r.data === true, () => false),
-        sb.from('follows').select('followee').then((r) => (r.data || []).map((x) => x.followee), () => [])
+        sb.from('follows').select('followee').then((r) => (r.data || []).map((x) => x.followee), () => []),
+        sb.from('profile_private').select('phone').eq('user_id', userId).maybeSingle().then((r) => r.data?.phone || null, () => null)
       ]);
-      return { socials, isAdmin, following };
+      return { socials, isAdmin, following, phone };
     },
     async saveSocials(ig, x, pub) { return chk(await sb.rpc('set_socials', { p_instagram: ig, p_x: x, p_public: pub })); },
     async setFollow(userId, on) { return chk(await sb.rpc('set_follow', { p_user: userId, p_on: on })); },
@@ -746,9 +792,8 @@ function DemoAPI() {
   const season = { id: 1, name: 'Season 1', weeks: 20, max_entries: 1, status: 'active' };
   const prizes = [
     { wins: 0, title: 'Season champion', prize: '' },
-    { wins: 5, title: '5 wins', prize: '' },
-    { wins: 10, title: '10 wins', prize: '' },
-    { wins: 15, title: '15 wins', prize: '' },
+    { wins: 10, title: '10 in a row', prize: '' },
+    { wins: 15, title: '15 in a row', prize: '' },
     { wins: 20, title: 'Perfect season', prize: '' }
   ];
   const rng = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -776,22 +821,29 @@ function DemoAPI() {
     return out;
   }
   const followersOf = (id) => { let h = 7; for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return id === 'me' ? 0 : h % 23; };
-  let st = store.get('hof-survivor-demo-v4', null) || fresh();
+  let st = store.get('hof-survivor-demo-v5', null) || fresh();
   if (!st.socials) st.socials = seedSocials(st.users);
   if (!st.follows) st.follows = [];
-  const save = () => store.set('hof-survivor-demo-v4', st);
+  const save = () => store.set('hof-survivor-demo-v5', st);
   const lockFirst = Math.min(...CARD.segments.map((s) => Date.parse(s.date)));
   const setClock = () => { const target = st.simulated ? lockFirst + 12 * 3600e3 : Math.min(Date.now(), lockFirst - 54 * 3600e3); timeOffset = target - Date.now(); };
   setClock();
   const events = () => SCHEDULE.map(([id, name, starts_at, venue, location], i) => ({ id, name, starts_at, venue: venue || null, location: location || null, week_no: i + 1, season_id: 1, status: i === 0 && st.simulated ? 'final' : 'scheduled' }));
-  const fightsOf = (eventId) => eventId !== CARD.id ? [] : baseFights.map((f) => {
-    const res = st.results[f.id];
-    return { ...f, ...(res || {}), status: res ? 'final' : 'scheduled', a: fighters[f.fighter_a], b: fighters[f.fighter_b] };
-  });
+  const W2 = SCHEDULE[1][0], WEEK = 7 * 24 * 3600e3;
+  const fightsOf = (eventId) => {
+    if (eventId === CARD.id) return baseFights.map((f) => {
+      const res = st.results[f.id];
+      return { ...f, ...(res || {}), status: res ? 'final' : 'scheduled', a: fighters[f.fighter_a], b: fighters[f.fighter_b] };
+    });
+    // week 2 in the demo: the same fighters, a week later (so you can try starting a new streak)
+    if (eventId === W2) return baseFights.map((f) => ({ ...f, id: 'w2-' + f.id, event_id: W2, lock_at: new Date(Date.parse(f.lock_at) + WEEK).toISOString(), status: 'scheduled', a: fighters[f.fighter_a], b: fighters[f.fighter_b] }));
+    return [];
+  };
   const locked = () => st.simulated || now() >= lockFirst;
   const regrade = () => {
     const fx = Object.fromEntries(fightsOf(CARD.id).map((f) => [f.id, f]));
     st.picks.forEach((p) => {
+      if (p.event_id !== CARD.id) return;
       const f = fx[p.fight_id];
       if (!f || f.status !== 'final') { p.result = 'pending'; p.dog = false; return; }
       p.result = f.winner && f.winner === p.fighter_id ? 'win' : 'loss';
@@ -804,19 +856,30 @@ function DemoAPI() {
       e.dog_wins = ps.filter((p) => p.dog).length;
       const lostP = ps.find((p) => p.result === 'loss'), lost = !!lostP;
       const missed = st.simulated && e.start_week <= 1 && !ps.some((p) => p.event_id === CARD.id);
+      if (e.start_week > 1) { e.wins = 0; e.status = 'alive'; e.out_week = null; e.out_reason = null; return; }
       e.status = lost || missed ? 'out' : 'alive';
       e.out_week = lost || missed ? 1 : null;
       e.out_reason = lost ? (fx[lostP.fight_id]?.winner ? 'loss' : 'draw') : missed ? 'no pick' : null;
     });
   };
   const userById = (id) => id === 'me' ? st.me?.profile : st.users.find((u) => u.id === id);
+  // one row per player: best streak ranks (ties share a rank), live streak shown too
   const ranked = () => {
-    const rows = st.entries.map((e) => { const u = userById(e.user_id) || {}; return { ...e, entry_id: e.id, username: u.username || 'player', avatar_url: u.avatar_url || null }; });
-    rows.sort((x, y) => y.wins - x.wins || (y.status === 'alive') - (x.status === 'alive') || y.dog_wins - x.dog_wins || x.username.localeCompare(y.username));
+    const by = {};
+    st.entries.forEach((e) => {
+      const r = by[e.user_id] || (by[e.user_id] = { user_id: e.user_id, best: 0, current: 0, alive: false, runs: 0, dog_wins: 0, start_week: 99, last: 0 });
+      r.best = Math.max(r.best, e.wins); r.runs++; r.dog_wins += e.dog_wins; r.start_week = Math.min(r.start_week, e.start_week);
+      if (e.status === 'alive') { r.alive = true; r.current = e.wins; }
+      if (e.entry_no >= r.last) Object.assign(r, { last: e.entry_no, entry_id: e.id, out_week: e.out_week, out_reason: e.out_reason });
+    });
+    const rows = Object.values(by).map((r) => { const u = userById(r.user_id) || {}; return { ...r, wins: r.best, status: r.alive ? 'alive' : 'out', username: u.username || 'player', avatar_url: u.avatar_url || null }; });
+    rows.sort((x, y) => y.best - x.best || y.current - x.current || x.username.localeCompare(y.username));
     let rank = 0, prev = null;
-    rows.forEach((r, i) => { const key = [r.wins, r.status === 'alive', r.dog_wins].join(); if (key !== prev) { rank = i + 1; prev = key; } r.rank = rank; });
+    rows.forEach((r) => { if (r.best !== prev) { rank++; prev = r.best; } r.rank = rank; });
     return rows;
   };
+  const weekOfEv = (id) => events().find((x) => x.id === id)?.week_no;
+  const cleanPhone = (v) => { let p = String(v || '').replace(/[^0-9+]/g, ''); if (p.startsWith('00')) p = '+' + p.slice(2); return /^\+?\d{7,15}$/.test(p) ? p : null; };
   const fail = (m) => { throw new Error(m); };
   const delay = (v) => new Promise((res) => setTimeout(() => res(v), 80));
   return {
@@ -825,8 +888,9 @@ function DemoAPI() {
     async fights(eventId) { return delay(fightsOf(eventId)); },
     async me() { return st.me ? { user: { id: 'me', email: st.me.email }, profile: st.me.profile } : null; },
     async myEntry() {
-      const entry = st.entries.find((e) => e.user_id === 'me') || null;
-      return { entry, picks: entry ? st.picks.filter((p) => p.entry_id === entry.id).map((p) => ({ ...p, fighter: fighters[p.fighter_id] })) : [] };
+      const entries = st.entries.filter((e) => e.user_id === 'me').sort((a, b) => a.entry_no - b.entry_no);
+      const ids = entries.map((e) => e.id);
+      return { entries, picks: st.picks.filter((p) => ids.includes(p.entry_id)).map((p) => ({ ...p, fighter: fighters[p.fighter_id] })) };
     },
     async leaderboard(seasonId, { filter, q, offset = 0, limit = 50, ids = [] }) {
       let rows = ranked();
@@ -836,10 +900,15 @@ function DemoAPI() {
       return delay({ rows: rows.slice(offset, offset + limit), total: rows.length });
     },
     async myRank() { return ranked().find((r) => r.user_id === 'me') || null; },
-    async stats() { return { entries: st.entries.length, alive: st.entries.filter((e) => e.status === 'alive').length, players: st.entries.length }; },
-    async revealed(eventId, entryIds) {
-      return st.picks.filter((p) => p.event_id === eventId && entryIds.includes(p.entry_id) && (locked() || st.adminView || st.entries.find((e) => e.id === p.entry_id)?.user_id === 'me')).map((p) => ({ ...p, fighter: fighters[p.fighter_id] }));
+    async stats() { const r = ranked(); return { entries: st.entries.length, alive: r.filter((x) => x.alive).length, players: r.length }; },
+    async boardPicks(seasonId, ids) {
+      return st.picks.map((p) => ({ p, e: st.entries.find((e) => e.id === p.entry_id) })).filter(({ e }) => e && ids.includes(e.user_id)).map(({ p, e }) => {
+        const show = locked() || st.adminView || e.user_id === 'me', f = fighters[p.fighter_id] || {};
+        return { user_id: e.user_id, entry_no: e.entry_no, event_id: p.event_id, week_no: weekOfEv(p.event_id), fighter_id: show ? f.id : null, fighter_name: show ? f.name : null,
+          last_name: show ? f.last_name : null, headshot_url: show ? f.headshot_url : null, result: show ? p.result : 'pending', hidden: !show };
+      });
     },
+    async setPhone(v) { if (!st.me?.profile) fail('Create your profile first'); const p = cleanPhone(v); if (!p) fail('That phone number does not look right. Include your country code'); st.phone = p; save(); return p; },
     async pickStats(eventId) {
       if (!locked() && !st.adminView) return [];
       const vis = st.picks.filter((p) => p.event_id === eventId);
@@ -857,7 +926,7 @@ function DemoAPI() {
     },
     async uploadAvatar(photo) { st.me.profile.avatar_url = photo.dataUrl; save(); return photo.dataUrl; },
     async removeAvatar() { st.me.profile.avatar_url = null; save(); },
-    async extras() { return { socials: st.socials.me || null, isAdmin: !!(st.adminView && st.me?.profile), following: [...st.follows] }; },
+    async extras() { return { socials: st.socials.me || null, isAdmin: !!(st.adminView && st.me?.profile), following: [...st.follows], phone: st.phone || null }; },
     async saveSocials(ig, x, pub) { if (!st.me?.profile) fail('Create your profile first'); st.socials.me = { instagram: ig, x_handle: x, is_public: pub }; save(); return st.socials.me; },
     async setFollow(id, on) {
       if (!st.me?.profile) fail('Create your profile first');
@@ -868,18 +937,20 @@ function DemoAPI() {
       const u = userById(userId); if (!u) fail('Player not found');
       const isMe = userId === 'me', admin = !!st.adminView;
       const so = st.socials[userId], show = !!so && (so.is_public || isMe || admin);
-      const e = st.entries.find((x) => x.user_id === userId);
+      const runs = st.entries.filter((x) => x.user_id === userId).sort((a, b) => a.entry_no - b.entry_no);
+      const e = runs[runs.length - 1];
       const rk = ranked().find((r) => r.user_id === userId);
-      const picks = !e ? [] : st.picks.filter((p) => p.entry_id === e.id && (locked() || isMe || admin)).map((p) => {
+      const picks = st.picks.filter((p) => runs.some((x) => x.id === p.entry_id) && (locked() || isMe || admin)).map((p) => {
         const f = fighters[p.fighter_id] || {};
-        return { week_no: 1, event_id: p.event_id, fighter_id: p.fighter_id, fighter_name: f.name, last_name: f.last_name, headshot_url: f.headshot_url, result: p.result, pick_pct: p.pick_pct };
+        return { week_no: weekOfEv(p.event_id), event_id: p.event_id, fighter_id: p.fighter_id, fighter_name: f.name, last_name: f.last_name, headshot_url: f.headshot_url, result: p.result, pick_pct: p.pick_pct };
       });
       const bold = picks.filter((p) => p.result === 'win' && p.pick_pct != null).sort((a, b) => a.pick_pct - b.pick_pct)[0] || null;
       const following = st.follows.includes(userId);
       return delay({ user_id: userId, username: u.username, avatar_url: u.avatar_url || null, joined_at: '2026-10-14T12:00:00Z', is_me: isMe,
         instagram: show ? so.instagram : null, x_handle: show ? so.x_handle : null, socials_public: isMe || admin ? (so ? so.is_public : true) : null,
         following, followers: followersOf(userId) + (following ? 1 : 0),
-        entry: e ? { entry_id: e.id, status: e.status, wins: e.wins, dog_wins: e.dog_wins, start_week: e.start_week, out_week: e.out_week, out_reason: e.out_reason, rank: rk?.rank, players: st.entries.length } : null,
+        entry: e ? { entry_id: e.id, status: e.status, wins: e.wins, current: e.status === 'alive' ? e.wins : 0, best: rk?.best ?? e.wins, runs: runs.length, dog_wins: rk?.dog_wins ?? e.dog_wins,
+          start_week: runs[0].start_week, run_start_week: e.start_week, out_week: e.out_week, out_reason: e.out_reason, rank: rk?.rank, players: ranked().length } : null,
         boldest: bold, picks });
     },
     async adminOverview() {
@@ -887,8 +958,9 @@ function DemoAPI() {
       const evPicks = ev ? st.picks.filter((p) => p.event_id === ev.id) : [];
       const c = {}; evPicks.forEach((p) => { c[p.fighter_id] = (c[p.fighter_id] || 0) + 1; });
       const split = Object.entries(c).map(([id, n]) => ({ fighter_id: id, name: fighters[id]?.name, last_name: fighters[id]?.last_name, headshot_url: fighters[id]?.headshot_url, picks: n, pct: Math.round(1000 * n / evPicks.length) / 10 })).sort((a, b) => b.picks - a.picks);
-      const alive = st.entries.filter((e) => e.status === 'alive');
-      return delay({ profiles: st.users.length + (st.me?.profile ? 1 : 0), new_24h: 6, new_7d: st.users.length, entries: st.entries.length, alive: alive.length, out: st.entries.length - alive.length,
+      const alive = st.entries.filter((e) => e.status === 'alive'), rk = ranked();
+      return delay({ profiles: st.users.length + (st.me?.profile ? 1 : 0), new_24h: 6, new_7d: st.users.length, entries: rk.length, alive: rk.filter((x) => x.alive).length, out: rk.filter((x) => !x.alive).length,
+        restarts: st.entries.filter((e) => e.entry_no > 1).length, phones: st.phone ? 1 : 0,
         with_socials: Object.keys(st.socials).length, follows: st.follows.length,
         event: ev ? { id: ev.id, name: ev.name, week_no: ev.week_no, starts_at: ev.starts_at, locked: ev.id === CARD.id && locked() } : null,
         picks_made: evPicks.length, need_pick: ev ? alive.filter((e) => e.start_week <= ev.week_no && !evPicks.some((p) => p.entry_id === e.id)).length : 0, split });
@@ -897,34 +969,40 @@ function DemoAPI() {
       const ev = events().find((x) => x.status !== 'final');
       const all = [...st.users.map((u) => ({ ...u, email: `${u.username.toLowerCase()}@example.com` })), ...(st.me?.profile ? [{ id: 'me', username: st.me.profile.username, avatar_url: st.me.profile.avatar_url, email: st.me.email }] : [])];
       return delay(all.map((u) => {
-        const e = st.entries.find((x) => x.user_id === u.id), p = e && ev && st.picks.find((x) => x.entry_id === e.id && x.event_id === ev.id), f = p && fighters[p.fighter_id], so = st.socials[u.id] || {};
-        return { user_id: u.id, username: u.username, email: u.email, avatar_url: u.avatar_url || null, instagram: so.instagram || null, x_handle: so.x_handle || null,
+        const runs = st.entries.filter((x) => x.user_id === u.id).sort((a, b) => a.entry_no - b.entry_no), e = runs[runs.length - 1];
+        const p = e && ev && st.picks.find((x) => x.entry_id === e.id && x.event_id === ev.id), f = p && fighters[p.fighter_id], so = st.socials[u.id] || {};
+        return { user_id: u.id, username: u.username, email: u.email, phone: u.id === 'me' ? (st.phone || null) : null, best: runs.length ? Math.max(...runs.map((x) => x.wins)) : null, runs: runs.length,
+          avatar_url: u.avatar_url || null, instagram: so.instagram || null, x_handle: so.x_handle || null,
           socials_public: so.instagram || so.x_handle ? so.is_public : null, joined_at: '2026-10-14T12:00:00Z', entry_id: e?.id || null, status: e?.status || null,
           wins: e?.wins ?? null, dog_wins: e?.dog_wins ?? null, start_week: e?.start_week ?? null, out_week: e?.out_week ?? null, out_reason: e?.out_reason ?? null,
           pick_fighter: f?.name || null, pick_last_name: f?.last_name || null, pick_headshot: f?.headshot_url || null, pick_pct: p?.pick_pct ?? null,
           picked_at: p ? '2026-10-15T18:00:00Z' : null, followers: followersOf(u.id) + (st.follows.includes(u.id) ? 1 : 0) };
-      }).sort((a, b) => (b.wins ?? -1) - (a.wins ?? -1)));
+      }).sort((a, b) => (b.best ?? -1) - (a.best ?? -1)));
     },
     adminView() { return !!st.adminView; },
     toggleAdmin() { st.adminView = !st.adminView; save(); return st.adminView; },
     async join() {
       if (!st.me?.profile) fail('Create your profile first');
-      if (st.entries.some((e) => e.user_id === 'me')) fail('You already joined this season');
-      const e = { id: 9001, user_id: 'me', season_id: 1, entry_no: 1, start_week: locked() ? 2 : 1, status: 'alive', wins: 0, pushes: 0, dog_wins: 0, out_week: null, out_reason: null };
+      const mine = st.entries.filter((e) => e.user_id === 'me');
+      const live = mine.find((e) => e.status === 'alive');
+      if (live) return live;
+      const n = mine.reduce((m, e) => Math.max(m, e.entry_no), 0);
+      const e = { id: 9001 + n, user_id: 'me', season_id: 1, entry_no: n + 1, start_week: locked() ? 2 : 1, status: 'alive', wins: 0, pushes: 0, dog_wins: 0, out_week: null, out_reason: null };
       st.entries.push(e); save(); return e;
     },
     async makePick(entryId, fightId, fighterId) {
       const e = st.entries.find((x) => x.id === entryId && x.user_id === 'me');
       if (!e) fail('Entry not found');
-      if (e.status !== 'alive') fail('You are out for this season');
-      if (st.simulated) fail('Picks for week 2 open once that card is posted');
-      if (locked()) fail('Picks for week 1 are locked. The card has started.');
-      const f = fightsOf(CARD.id).find((x) => x.id === fightId);
+      if (e.status !== 'alive') fail('That streak is over. Make a pick to start a new one');
+      if (e.wins >= 3 && !st.phone) fail('Add your phone number to keep your streak going');
+      const evId = st.simulated ? W2 : CARD.id;
+      if (!st.simulated && locked()) fail('Picks for week 1 are locked. The card has started.');
+      const f = fightsOf(evId).find((x) => x.id === fightId);
       if (!f || ![f.fighter_a, f.fighter_b].includes(fighterId)) fail('That fighter is not in this bout');
       const pct = fighterId === f.fighter_a ? winPct(f.a_odds, f.b_odds) : winPct(f.b_odds, f.a_odds);
-      const cur = st.picks.find((p) => p.entry_id === entryId && p.event_id === CARD.id);
+      const cur = st.picks.find((p) => p.entry_id === entryId && p.event_id === evId);
       if (cur) Object.assign(cur, { fight_id: fightId, fighter_id: fighterId, pick_pct: pct });
-      else st.picks.push({ id: 'm' + entryId, entry_id: entryId, event_id: CARD.id, fight_id: fightId, fighter_id: fighterId, pick_pct: pct, result: 'pending', dog: false });
+      else st.picks.push({ id: 'm' + entryId + evId, entry_id: entryId, event_id: evId, fight_id: fightId, fighter_id: fighterId, pick_pct: pct, result: 'pending', dog: false });
       save(); return true;
     },
     simulate() {
@@ -950,9 +1028,9 @@ const S = {
   tab: storedTab === 'entries' ? 'season' : storedTab,
   season: null, prizes: [], events: [], openEvent: null, viewEventId: null,
   fights: [], fightsFor: null, locked: false,
-  me: null, entry: null, picks: [],
+  me: null, entry: null, entries: [], picks: [], phone: null,
   draft: null, tape: {}, popular: {}, photo: undefined,
-  lb: { filter: 'all', q: '', rows: [], total: 0, offset: 0, revealed: {} }, myRank: null, top: [], stats: null,
+  lb: { filter: 'all', q: '', rows: [], total: 0, offset: 0, picks: {} }, myRank: null, top: [], stats: null,
   socials: null, isAdmin: false, following: new Set(), followRows: [], player: null,
   admin: { ov: null, players: [], q: '', filter: 'all', limit: 100, allSplit: false },
   loading: true, error: null
@@ -992,10 +1070,14 @@ async function loadPopular() {
 }
 async function loadMe() {
   S.me = await api.me();
-  if (S.me?.profile && S.season) { const r = await api.myEntry(S.me.user.id, S.season.id); S.entry = r.entry; S.picks = r.picks; }
-  else { S.entry = null; S.picks = []; }
-  if (S.me?.profile) { const x = await api.extras(S.me.user.id); S.socials = x.socials; S.isAdmin = x.isAdmin; S.following = new Set(x.following); }
-  else { S.socials = null; S.isAdmin = false; S.following = new Set(); }
+  if (S.me?.profile && S.season) {
+    const r = await api.myEntry(S.me.user.id, S.season.id);
+    S.entries = r.entries || []; S.picks = r.picks || [];
+    // the live streak if there is one, otherwise the run that ended most recently
+    S.entry = S.entries.find((e) => e.status === 'alive') || S.entries[S.entries.length - 1] || null;
+  } else { S.entry = null; S.entries = []; S.picks = []; }
+  if (S.me?.profile) { const x = await api.extras(S.me.user.id); S.socials = x.socials; S.isAdmin = x.isAdmin; S.following = new Set(x.following); S.phone = x.phone || null; }
+  else { S.socials = null; S.isAdmin = false; S.following = new Set(); S.phone = null; }
 }
 async function loadBoard(append = false) {
   if (!S.season) return;
@@ -1004,9 +1086,11 @@ async function loadBoard(append = false) {
   const r = await api.leaderboard(S.season.id, { filter: S.lb.filter, q: S.lb.q, offset: off, ids: [...S.following] });
   S.lb.rows = append ? S.lb.rows.concat(r.rows) : r.rows;
   S.lb.total = r.total; S.lb.offset = off;
-  if (!append) S.lb.revealed = {};
+  if (!append) S.lb.picks = {};
   S.myRank = S.me?.profile ? await api.myRank(S.season.id, S.me.user.id) : null;
-  if (S.openEvent && r.rows.length) (await api.revealed(S.openEvent.id, r.rows.map((x) => x.entry_id))).forEach((p) => { S.lb.revealed[p.entry_id] = p; });
+  const ids = r.rows.map((x) => x.user_id).filter((id) => !S.lb.picks[id]);
+  ids.forEach((id) => { S.lb.picks[id] = {}; });
+  if (ids.length) (await api.boardPicks(S.season.id, ids)).forEach((p) => { (S.lb.picks[p.user_id] = S.lb.picks[p.user_id] || {})[p.week_no] = p; });
 }
 async function loadFollowRows() {
   if (!S.me?.profile || !S.season || !S.following.size) { S.followRows = []; return; }
@@ -1042,8 +1126,10 @@ async function refresh({ season = false, quiet = false } = {}) {
    ===================================================================== */
 const TABS = [['pick', 'Picks', 'Picks', 'picks'], ['season', 'My season', 'Season', 'season'], ['board', 'Leaderboard', 'Leaders', 'board'], ['rules', 'Rules', 'Rules', 'rules']];
 function needsPick() {
-  if (!(S.entry && S.entry.status === 'alive' && S.openEvent && S.openEvent.status !== 'final' && S.fightsFor === S.openEvent.id && S.fights.length &&
-    !S.locked && S.entry.start_week <= S.openEvent.week_no)) return false;
+  if (!(S.me?.profile && S.openEvent && S.openEvent.status !== 'final' && S.fightsFor === S.openEvent.id && S.fights.length && !S.locked)) return false;
+  const e = S.entry;
+  if (!e || e.status !== 'alive') return S.season?.status !== 'complete';   // can start a (new) streak right now
+  if (e.start_week > S.openEvent.week_no) return false;
   const p = pickFor(S.openEvent.id);
   return !p || S.fights.find((f) => f.id === p.fight_id)?.status === 'canceled';
 }
@@ -1061,6 +1147,7 @@ function render() {
   else if (!S.season) v.innerHTML = `<div class="empty"><b>No season running yet</b>${S.error ? esc(S.error) : 'Check back soon.'}</div>`;
   else v.innerHTML = S.tab === 'season' ? viewSeason() : S.tab === 'board' ? viewBoard() : S.tab === 'rules' ? viewRules() : S.tab === 'admin' && S.isAdmin ? viewAdmin() : viewPick();
   $('#aside').innerHTML = S.season ? viewAside() : '';
+  const lbw = $('#lbwrap'); if (lbw) lbw.scrollLeft = lbw.scrollWidth;   // newest week in view
   renderSheet(); renderDemo();
 }
 
@@ -1070,8 +1157,10 @@ function pickCtx() {
   const isOpenWeek = !!(ev && open && ev.id === open.id && ev.status !== 'final');
   const entry = S.me?.profile ? S.entry : null;
   const pick = entry && ev ? pickFor(ev.id) : null;
-  const canPick = !!(isOpenWeek && !S.locked && entry && entry.status === 'alive' && entry.start_week <= (ev?.week_no ?? 0));
-  return { ev, isOpenWeek, entry, pick, canPick, draft: S.draft };
+  // no live streak: the next pick starts a new one
+  const fresh = !!(S.me?.profile && (!entry || entry.status !== 'alive'));
+  const canPick = !!(isOpenWeek && !S.locked && S.me?.profile && S.season?.status !== 'complete' && (fresh || entry.start_week <= (ev?.week_no ?? 0)));
+  return { ev, isOpenWeek, entry, pick, canPick, fresh, draft: S.draft };
 }
 function sideState(f, fighter, ctx) {
   const id = fighter?.id;
@@ -1082,7 +1171,7 @@ function sideState(f, fighter, ctx) {
   const r = isPick ? ctx.pick.result : null;
   const won = final && !!f.winner && f.winner === id;
   const lost = (final && f.winner !== id) || r === 'loss';
-  const gate = !S.me?.profile || !S.entry;
+  const gate = !S.me?.profile;
   const disabled = !id || f.status === 'canceled' || !ctx.isOpenWeek || S.locked || (!gate && !ctx.canPick);
   let tag = '';
   if (isPick && !isDraft && !ctx.draft) tag = r === 'win' || won ? 'You won' : lost ? 'You lost' : r === 'push' ? 'Void' : 'Your pick';
@@ -1109,11 +1198,9 @@ function viewPick() {
   if (future) h += `<div class="notice">Picks for this card open after week ${S.openEvent.week_no} (${esc(eventTitle(S.openEvent).main)}) is over. <button class="link" data-act="week" data-dir="0">Go to week ${S.openEvent.week_no}</button></div>`;
   else if (ev && S.openEvent && ev.id !== S.openEvent.id) h += `<p style="margin:10px 0 0"><button class="link" data-act="week" data-dir="0">Back to this week</button></p>`;
 
-  if (!S.me) h += `<div class="welcome"><p><b>Pick one fighter. Survive the week.</b>Free to play. Pick a winner every UFC card and build a streak for prizes.</p><button class="btn btn-dark" data-act="auth" data-mode="up">Play free</button></div>`;
+  if (!S.me) h += `<div class="welcome"><p><b>Pick one fighter. Win and your streak grows.</b>Free to play. Pick a winner every UFC card. Lose and you're straight back in next week.</p><button class="btn btn-dark" data-act="auth" data-mode="up">Play free</button></div>`;
   else if (!S.me.profile) h += `<div class="welcome"><p><b>Choose a username</b>You'll show up on the leaderboard with it.</p><button class="btn btn-dark" data-act="profile">Create profile</button></div>`;
-  else if (!S.entry) h += S.season.status === 'complete'
-    ? `<div class="welcome"><p><b>This season is over</b>The next season opens soon.</p></div>`
-    : `<div class="welcome"><p><b>Join ${esc(S.season.name)}</b>Free. One entry per player, picks start ${openLocked() ? 'next card' : 'this card'}.</p><button class="btn btn-dark" data-act="join">Join the season</button></div>`;
+  else if (S.season.status === 'complete' && S.entry?.status !== 'alive') h += `<div class="welcome"><p><b>This season is over</b>The next season opens soon.</p></div>`;
   else if (!future) h += statusHTML(ctx, lockAt);
 
   if (!ev) return h + `<div class="empty"><b>No card yet</b>The next UFC event shows up here once it's announced.</div>`;
@@ -1122,33 +1209,49 @@ function viewPick() {
 
   const main = fights.find((f) => f.match_no === 1) || fights.find((f) => /main event/i.test(f.note || '')) || fights[0];
   h += headlinerHTML(main, ctx);
+  // the list repeats the main event first, so nobody scrolls past it
   const segs = [];
-  fights.filter((f) => f !== main).forEach((f) => { let s = segs.find((x) => x.key === f.segment); if (!s) segs.push(s = { key: f.segment, label: f.segment_label, fights: [] }); s.fights.push(f); });
+  [main, ...fights.filter((f) => f !== main)].forEach((f) => { let s = segs.find((x) => x.key === f.segment); if (!s) segs.push(s = { key: f.segment, label: f.segment_label, fights: [] }); s.fights.push(f); });
   segs.forEach((s) => {
     const start = s.fights.reduce((m, f) => Math.min(m, Date.parse(f.lock_at)), Infinity);
-    h += `<div class="seg"><h2 class="c">${esc(s.label || 'Card')}</h2><span>${Number.isFinite(start) ? esc(fmtTime(start)) : ''}</span></div><div class="fights">${s.fights.map((f) => fightHTML(f, ctx)).join('')}</div>`;
+    h += `<div class="seg"><h2 class="c">${esc(s.label || 'Card')}</h2><span>${Number.isFinite(start) ? esc(fmtTime(start)) : ''}</span></div><div class="fights">${s.fights.map((f) => fightHTML(f, ctx, f === main)).join('')}</div>`;
   });
   return h;
 }
 function statusHTML(ctx, lockAt) {
   const e = S.entry, ev = ctx.ev;
-  let cls = '', title = '', sub = '', av = avatarHTML(S.me.profile.avatar_url, S.me.profile.username, 'm');
+  const lockTxt = Number.isFinite(lockAt) ? `${fmtDay(lockAt)}, ${fmtTime(lockAt)}` : 'the first fight';
+  const openNow = ctx.isOpenWeek && !S.locked;
+  let av = avatarHTML(S.me.profile.avatar_url, S.me.profile.username, 'm');
+  // a tappable card: scrolls down to the fights (or opens the phone form)
+  const go = (cls, title, sub, act) => `<button class="mystatus ${cls}" data-act="${act}">${av}<span class="t"><b>${title}</b>${sub}</span><span class="go" aria-hidden="true">${act === 'scrollcard' ? I.down : I.right}</span></button>`;
+  const box = (cls, title, sub, extra = '') => `<div class="mystatus ${cls}">${av}<span class="t"><b>${title}</b>${sub}</span>${extra}</div>`;
+  if (!e || e.status === 'out') {
+    if (openNow && S.season.status !== 'complete') return !e
+      ? go('need', 'Make your pick', `Tap any fighter to win and you're in. Picks lock ${esc(lockTxt)}.`, 'scrollcard')
+      : go('need', 'Start a new streak', `Your last streak ended at ${plural(e.wins, 'win')}. Make your pick and you're back in. Picks lock ${esc(lockTxt)}.`, 'scrollcard');
+    if (!e) return box('', 'Picks open soon', 'Make your first pick once the next card opens.');
+    const shown = ctx.pick ? '' : '';
+    return box('out', 'Streak ended', `Ended in week ${e.out_week ?? '?'}${e.out_reason && e.out_reason !== 'loss' ? ` (${esc(e.out_reason)})` : ''} at ${plural(e.wins, 'win')}. Start a new streak when the next card opens.${shown}`);
+  }
+  if (ev && e.start_week > ev.week_no) return box('', `Your streak starts in week ${e.start_week}`, 'You joined after this card started.');
   const p = ctx.pick;
-  if (e.status === 'out') { cls = 'out'; title = "You're out for this season"; sub = `Knocked out in week ${e.out_week ?? '?'}${e.out_reason && e.out_reason !== 'loss' ? ` (${esc(e.out_reason)})` : ''} with ${plural(e.wins, 'win')}.`; }
-  else if (ev && e.start_week > ev.week_no) { title = `You start in week ${e.start_week}`; sub = 'You joined after this card started.'; }
-  else if (p) {
+  if (openNow && !p && e.wins >= 3 && !S.phone) return go('need', 'Add your phone number', `You're on ${e.wins} in a row. Add your number to keep your streak going.`, 'phone');
+  if (p) {
     av = avatarHTML(p.fighter?.headshot_url, p.fighter?.name, 'm');
     const name = esc(p.fighter?.name || 'your fighter');
     const pf = S.fightsFor === ev?.id ? S.fights.find((f) => f.id === p.fight_id) : null;
-    if (p.result === 'win') { title = `${name} won`; sub = 'You survived this week.'; }
-    else if (p.result === 'push') { title = 'Card cancelled'; sub = "This week doesn't count. You're still alive."; }
-    else if (pf?.status === 'canceled' && !S.locked) { cls = 'need'; title = `${name}'s fight is off`; sub = `Pick another fighter before ${esc(fmtDay(lockAt))}, ${esc(fmtTime(lockAt))} or you're out.`; }
-    else if (pf?.status === 'canceled') { cls = 'out'; title = `${name}'s fight was cancelled`; sub = 'A cancelled fight counts as a loss.'; }
-    else if (S.locked) { title = `Your pick: ${name}`; sub = 'Locked in. Good luck.'; }
-    else { title = `Your pick: ${name}`; sub = `Change it any time before ${esc(fmtDay(lockAt))}, ${esc(fmtTime(lockAt))}. <button class="link" data-act="share">Share</button>`; }
-  } else if (ctx.isOpenWeek && !S.locked) { cls = 'need'; title = 'Make your pick'; sub = `Tap a fighter to win. Picks lock ${esc(fmtDay(lockAt))}, ${esc(fmtTime(lockAt))}.`; }
-  else title = 'No pick this week';
-  return `<div class="mystatus ${cls}">${av}<span class="t"><b>${title}</b>${sub}</span></div>`;
+    const share = `<button class="btn btn-dark btn-sm" data-act="share">${I.share} Share</button>`;
+    if (p.result === 'win') return box('', `${name} won`, `That's ${plural(e.wins, 'win')} in a row.`, share);
+    if (p.result === 'loss') return box('out', `${name} lost`, 'Your streak ended. Make next week\'s pick to start a new one.');
+    if (p.result === 'push') return box('', 'Card cancelled', "This week doesn't count. Your streak is safe.");
+    if (pf?.status === 'canceled' && !S.locked) return go('need', `${name}'s fight is off`, `Pick another fighter before ${esc(lockTxt)} or your streak ends.`, 'scrollcard');
+    if (pf?.status === 'canceled') return box('out', `${name}'s fight was cancelled`, 'A cancelled fight counts as a loss.');
+    if (S.locked) return box('', `Your pick: ${name}`, 'Locked in. Good luck.', share);
+    return box('', `Your pick: ${name}`, `Change it any time before ${esc(lockTxt)}.`, share);
+  }
+  if (openNow) return go('need', 'Make your pick', `Tap a fighter to win. Picks lock ${esc(lockTxt)}.`, 'scrollcard');
+  return box('', 'No pick this week', '');
 }
 function headlinerHTML(f, ctx) {
   const side = (fighter, L) => {
@@ -1166,7 +1269,7 @@ function headlinerHTML(f, ctx) {
   let foot;
   if (f.status === 'final') { const w = f.winner === f.a?.id ? f.a : f.winner === f.b?.id ? f.b : null; foot = `<span class="res">${w ? `${esc(w.name)} wins by ${esc(methodLabel[f.method] || f.result_raw || 'decision')}${f.end_round ? `, round ${f.end_round}` : ''}` : esc(f.result_raw || 'Draw')}</span>`; }
   else foot = `<span>${esc(f.weight_class || '')}</span>`;
-  return `<section class="headliner" aria-label="Main event">
+  return `<section class="headliner" id="card-top" aria-label="Main event">
     <div class="hl-top"><b>${/title/i.test(f.note || '') ? 'Title fight' : 'Main event'}</b><span>${f.rounds || 5} rounds</span></div>
     <div class="hl-row">${side(f.a, true)}<span class="hl-vs c">VS</span>${side(f.b, false)}</div>
     <div class="hl-foot">${foot}${popHTML(f)}<button class="link" style="color:var(--gold-2)" data-act="tape" data-fight="${esc(f.id)}">${S.tape[f.id] ? 'Hide stats' : 'Stats'}</button></div>
@@ -1180,7 +1283,7 @@ function popHTML(f) {
   const lead = pa >= pb ? f.a : f.b;
   return `<span class="popbar" title="Share of all players who picked this fighter">${S.locked ? '' : 'Admin: '}${Math.max(pa, pb)}% of players picked ${esc(lastName(lead))}</span>`;
 }
-function fightHTML(f, ctx) {
+function fightHTML(f, ctx, isMain = false) {
   const row = (fighter, L) => {
     const s = sideState(f, fighter, ctx);
     const pct = L ? winPct(f.a_odds, f.b_odds) : winPct(f.b_odds, f.a_odds);
@@ -1197,7 +1300,7 @@ function fightHTML(f, ctx) {
   else if (f.status === 'live') foot = `<div class="f-foot"><span class="pill live"><i></i>In progress</span>${popHTML(f)}</div>`;
   else if (S.locked && popHTML(f)) foot = `<div class="f-foot"><span>Up next</span>${popHTML(f)}</div>`;
   return `<article class="fight" id="f-${esc(f.id)}">
-    <div class="f-head"><span>${esc(f.weight_class || 'Bout')}${f.rounds === 5 ? ', 5 rounds' : ''}</span><button class="tape-btn" data-act="tape" data-fight="${esc(f.id)}" aria-expanded="${!!S.tape[f.id]}">Stats ${I.down}</button></div>
+    <div class="f-head"><span>${isMain ? `<span class="mainlbl">${/title/i.test(f.note || '') ? 'Title fight' : 'Main event'}</span>, ` : ''}${esc(f.weight_class || 'Bout')}${f.rounds === 5 ? ', 5 rounds' : ''}</span><button class="tape-btn" data-act="tape" data-fight="${esc(f.id)}" aria-expanded="${!!S.tape[f.id]}">Stats ${I.down}</button></div>
     ${row(f.a, true)}${row(f.b, false)}${foot}
     ${S.tape[f.id] ? tapeHTML(f) : ''}
   </article>`;
@@ -1228,7 +1331,7 @@ function renderSheet() {
   const root = $('#sheetroot');
   if (root.dataset.kind && root.dataset.kind !== 'pick') return; // a dialog is open
   const d = S.draft;
-  if (!d || !S.entry || S.tab !== 'pick') { root.innerHTML = ''; delete root.dataset.kind; return; }
+  if (!d || !S.me?.profile || S.tab !== 'pick') { root.innerHTML = ''; delete root.dataset.kind; return; }
   root.dataset.kind = 'pick';
   $('#toast').hidden = true;
   const fighter = fighterIn(d.fightId, d.fighterId);
@@ -1239,7 +1342,7 @@ function renderSheet() {
   root.innerHTML = `<div class="scrim" data-act="cancelpick"></div>
   <div class="sheet" role="dialog" aria-modal="true" aria-label="Confirm your pick">
     <div class="grab"></div>
-    <div class="who">${avatarHTML(fighter?.headshot_url, fighter?.name, 'l')}<div><small>Week ${S.openEvent?.week_no} pick</small><b class="c">${esc(fighter?.name || '')} to win</b><small class="pct">${pct != null ? `${pct}% to win` : 'No odds yet'}${opp ? ` against ${esc(opp.name)}` : ''}</small></div></div>
+    <div class="who">${avatarHTML(fighter?.headshot_url, fighter?.name, 'l')}<div><small>Week ${S.openEvent?.week_no} pick${pickCtx().fresh ? ', new streak' : ''}</small><b class="c">${esc(fighter?.name || '')} to win</b><small class="pct">${pct != null ? `${pct}% to win` : 'No odds yet'}${opp ? ` against ${esc(opp.name)}` : ''}</small></div></div>
     <p class="note">You can change it until the first fight starts${Number.isFinite(lockAt) ? ` (${esc(fmtDay(lockAt))}, ${esc(fmtTime(lockAt))})` : ''}. Nobody else sees your pick before then.</p>
     <div class="actions"><button class="btn btn-ghost" data-act="cancelpick">Cancel</button><button class="btn btn-dark" data-act="savepick" ${d.saving ? 'disabled' : ''}>${d.saving ? 'Saving…' : 'Confirm pick'}</button></div>
   </div>`;
@@ -1247,65 +1350,80 @@ function renderSheet() {
 
 /* ---------- MY SEASON ---------- */
 function viewSeason() {
-  if (!S.me?.profile) return `<h1 class="h1 c">My season</h1><div class="empty"><b>Not playing yet</b>Create a free profile to join the season.<div style="margin-top:14px"><button class="btn btn-dark" data-act="${S.me ? 'profile' : 'auth'}" data-mode="up">${S.me ? 'Create profile' : 'Play free'}</button></div></div>`;
+  if (!S.me?.profile) return `<h1 class="h1 c">My season</h1><div class="empty"><b>Not playing yet</b>Create a free profile and make your first pick.<div style="margin-top:14px"><button class="btn btn-dark" data-act="${S.me ? 'profile' : 'auth'}" data-mode="up">${S.me ? 'Create profile' : 'Play free'}</button></div></div>`;
   const prof = S.me.profile, e = S.entry;
-  if (!e) return `<h1 class="h1 c">My season</h1><div class="empty"><b>You haven't joined ${esc(S.season.name)}</b>It's free. One entry per player.<div style="margin-top:14px"><button class="btn btn-dark" data-act="join">Join the season</button></div></div>`;
+  if (!e) return `<h1 class="h1 c">My season</h1><div class="empty"><b>No picks yet</b>Pick any fighter on this week's card to start your streak.<div style="margin-top:14px"><button class="btn btn-dark" data-act="gopick">Make my pick</button></div></div>`;
+  const alive = e.status === 'alive', cur = alive ? e.wins : 0;
+  const best = S.entries.reduce((m, x) => Math.max(m, x.wins), 0);
   const tiers = S.prizes.filter((p) => p.wins > 0).sort((a, b) => a.wins - b.wins);
   const max = tiers.length ? tiers[tiers.length - 1].wins : S.season.weeks;
-  const next = tiers.find((t) => t.wins > e.wins);
+  const next = tiers.find((t) => t.wins > cur), first = tiers[0];
   const rank = S.myRank?.rank;
-  let h = `<div class="season-head">${avatarHTML(prof.avatar_url, prof.username, 'l')}<span class="t"><b class="c">${esc(prof.username)}</b><span><span class="badge ${e.status}">${e.status === 'alive' ? 'Alive' : `Out in week ${e.out_week ?? ''}`}</span>${rank && e.wins > 0 ? `Ranked #${rank}` : ''}</span></span>
-    <span class="wins"><b class="c tnum">${e.wins}</b><small>${e.wins === 1 ? 'win' : 'wins'}</small></span></div>`;
-  h += `<div class="track"><div class="line"><span class="fill" style="width:${Math.min(100, 100 * e.wins / max)}%"></span>${tiers.map((t) => `<span class="mk ${e.wins >= t.wins ? 'hit' : ''}" style="left:${100 * t.wins / max}%" title="${esc(prizeText(t) || 'Prize revealed soon')}"><span class="tnum">${t.wins}</span></span>`).join('')}</div>
-    <p>${e.status === 'out' ? `Your run ended in week ${e.out_week ?? ''}. You can join again next season.` : next ? (prizeText(next) ? `Next prize at ${next.wins} wins: ${esc(prizeText(next))}.` : `Next unlock at ${next.wins} wins. Prizes drop soon 👀`) : 'Every milestone unlocked.'}</p></div>`;
+  const open = S.openEvent, canStart = !alive && open && open.status !== 'final' && !openLocked() && S.season.status !== 'complete';
+  let h = `<div class="season-head">${avatarHTML(prof.avatar_url, prof.username, 'l')}<span class="t"><b class="c">${esc(prof.username)}</b><span><span class="badge ${alive ? 'alive' : 'out'}">${alive ? 'On a streak' : 'Streak ended'}</span>${rank && best > 0 ? `Ranked #${rank}` : ''}${best > 0 ? `, best ${best}` : ''}</span></span>
+    <span class="wins"><b class="c tnum">${cur}</b><small>in a row</small></span></div>`;
+  let msg;
+  if (!alive) msg = `Your streak ended in week ${e.out_week ?? ''} at ${plural(e.wins, 'win')}. ${canStart ? `<button class="link" data-act="gopick">Make your week ${open.week_no} pick</button> to start a new one.` : 'Start a new one when the next card opens.'}`;
+  else if (next && !prizeText(next)) msg = first && cur < first.wins ? `Prizes start at ${first.wins} in a row 👀 ${first.wins - cur} to go.` : `Next unlock at ${next.wins} in a row. Prizes drop soon 👀`;
+  else msg = next ? `Next prize at ${next.wins} in a row: ${esc(prizeText(next))}.` : 'Every milestone unlocked.';
+  h += `<div class="track"><div class="line"><span class="fill" style="width:${Math.min(100, 100 * cur / max)}%"></span>${tiers.map((t) => `<span class="mk ${cur >= t.wins ? 'hit' : ''}" style="left:${100 * t.wins / max}%" title="${esc(prizeText(t) || 'Prize revealed soon')}"><span class="tnum">${t.wins}</span></span>`).join('')}</div><p>${msg}</p></div>`;
   const evByWeek = Object.fromEntries(S.events.filter((x) => x.week_no).map((x) => [x.week_no, x]));
-  const cur = S.openEvent?.week_no || 1;
-  const last = e.status === 'out' ? (e.out_week || cur) : Math.max(e.start_week, cur);
-  const weeks = []; for (let w = e.start_week; w <= last; w++) weeks.push(w);
-  h += `<div class="box"><h3 class="c">Your picks</h3><div class="weeks">${weeks.map((w) => {
+  const curW = open?.week_no || 1;
+  const startW = S.entries.reduce((m, x) => Math.min(m, x.start_week), 99);
+  const pickWeeks = S.picks.map((p) => S.events.find((x) => x.id === p.event_id)?.week_no || 0);
+  const last = Math.max(alive || canStart ? curW : (e.out_week || curW), ...pickWeeks);
+  const weeks = []; for (let w = startW; w <= last; w++) weeks.push(w);
+  h += `<div class="box"><h3 class="c">Your picks <small>${S.entries.length > 1 ? plural(S.entries.length, 'streak') : ''}</small></h3><div class="weeks">${weeks.map((w) => {
     const ev = evByWeek[w], p = ev && S.picks.find((x) => x.event_id === ev.id);
     if (p) return `<span class="wk ${p.result === 'pending' ? 'pend' : p.result}" title="Week ${w}: ${esc(p.fighter?.name || '')}">${avatarHTML(p.fighter?.headshot_url, p.fighter?.name)}W${w}</span>`;
-    if (w === cur && e.status === 'alive' && S.openEvent?.status !== 'final' && !openLocked()) return `<button class="wk need" data-act="gopick">${'<span class="av">Pick</span>'}W${w}</button>`;
-    if (e.out_week === w) return `<span class="wk loss"><span class="av">–</span>W${w}</span>`;
+    if (w === curW && (alive || canStart) && open?.status !== 'final' && !openLocked()) return `<button class="wk need" data-act="gopick"><span class="av">Pick</span>W${w}</button>`;
     return `<span class="wk none"><span class="av"></span>W${w}</span>`;
-  }).join('')}</div></div>`;
+  }).join('')}</div>${pickFor(open?.id) ? `<div style="margin-top:12px"><button class="btn btn-dark btn-sm" data-act="share">${I.share} Share my pick</button></div>` : ''}</div>`;
   h += `<div class="box"><h3 class="c">Following <small>${S.following.size ? plural(S.following.size, 'player') : ''}</small></h3>${S.followRows.length
-    ? S.followRows.map((r) => `<button class="prow" data-act="player" data-user="${esc(r.user_id)}">${avatarHTML(r.avatar_url, r.username, 'm')}<span class="t">${esc(r.username)}<small>${r.status === 'out' ? `Out in week ${r.out_week ?? ''}` : 'Alive'}</small></span><span class="w c tnum">${r.wins}</span></button>`).join('')
+    ? S.followRows.map((r) => `<button class="prow" data-act="player" data-user="${esc(r.user_id)}">${avatarHTML(r.avatar_url, r.username, 'm')}<span class="t">${esc(r.username)}<small>${r.status === 'alive' ? (r.current > 0 ? `${r.current} in a row` : 'Alive') : 'Streak ended'}</small></span><span class="w c tnum" title="Best streak">${r.wins}</span></button>`).join('')
     : `<p>Follow players to keep an eye on their streaks here. Tap anyone on the <button class="link" data-act="tab" data-tab="board">leaderboard</button> to see their profile.</p>`}</div>`;
   h += `<p style="margin:14px 2px 0;display:flex;gap:16px;flex-wrap:wrap"><button class="link" data-act="player" data-user="${esc(S.me.user.id)}">See my profile</button><button class="link" data-act="profile">Edit profile, photo and socials</button></p>`;
   return h;
 }
 
 /* ---------- LEADERBOARD ---------- */
-const rankOf = (r, rows) => rows.some((x) => x.wins > 0) ? r.rank : '–';
-function lrowHTML(r) {
+const rankOf = (r) => r.wins > 0 ? r.rank : '–';
+const boardWeeks = () => { const cur = S.openEvent?.week_no ?? 0; return S.events.filter((e) => e.week_no != null && e.week_no <= cur).sort((a, b) => a.week_no - b.week_no); };
+const streakLine = (r) => r.status === 'alive' ? (r.current > 0 ? `${r.current} in a row` : 'Alive') : 'Streak ended';
+function cellHTML(r, ev) {
+  const p = S.lb.picks[r.user_id]?.[ev.week_no];
+  if (!p) return `<div class="cell none"></div>`;
+  if (p.hidden) return `<div class="cell hid" title="Picked. Hidden until the card starts">${I.lock}</div>`;
+  const cls = p.result === 'win' ? 'win' : p.result === 'loss' ? 'loss' : p.result === 'push' ? 'none' : 'pend';
+  const label = `${eventShort(ev)}: ${p.fighter_name || ''}${p.result === 'win' ? ', won' : p.result === 'loss' ? ', lost' : ''}`;
+  return `<div class="cell ${cls}" title="${esc(label)}">${avatarHTML(p.headshot_url, p.fighter_name, 's')}<span>${esc(p.last_name || lastName({ name: p.fighter_name }))}</span></div>`;
+}
+function lrowHTML(r, weeks) {
   const mine = S.me?.user && r.user_id === S.me.user.id;
-  const rv = S.lb.revealed[r.entry_id];
-  const wk = rv ? `<span title="${esc(rv.fighter?.name || '')}">${avatarHTML(rv.fighter?.headshot_url, rv.fighter?.name, 's')}</span>` : (r.status === 'alive' && S.openEvent?.status !== 'final' && (!r.start_week || r.start_week <= (S.openEvent?.week_no ?? 0)) ? `<span title="Hidden until the card starts">${I.lock}</span>` : '');
-  const sub = r.status === 'out' ? `Out in week ${r.out_week ?? ''}` : r.start_week > (S.openEvent?.week_no ?? 1) ? `Starts week ${r.start_week}` : 'Alive';
-  return `<button class="lrow ${mine ? 'me' : ''} ${r.status === 'out' ? 'out' : ''}" data-act="player" data-user="${esc(r.user_id)}" aria-label="See ${esc(r.username)}'s profile">
-    <span class="rk c tnum ${r.rank <= 3 && r.wins > 0 ? 'top' : ''}">${rankOf(r, S.lb.rows)}</span>
-    ${avatarHTML(r.avatar_url, r.username, 'm')}
-    <span class="lname"><b>${esc(r.username)}${mine ? ' (you)' : ''}${S.following.has(r.user_id) ? '<span class="fstar" title="Following">★</span>' : ''}</b><small>${sub}</small></span>
-    <span class="lpick" title="This week's pick">${wk}</span>
-    <span class="lwins c tnum">${r.wins}</span></button>`;
+  return `<button class="lg-row ${mine ? 'me' : ''}" data-act="player" data-user="${esc(r.user_id)}" aria-label="See ${esc(r.username)}'s profile">
+    <div class="lg-lead"><span class="rk c tnum ${r.rank === 1 && r.wins > 0 ? 'top' : ''}">${rankOf(r)}</span>${avatarHTML(r.avatar_url, r.username, 'm')}<span class="lname"><b>${esc(r.username)}${mine ? ' (you)' : ''}${S.following.has(r.user_id) ? '<span class="fstar" title="Following">★</span>' : ''}</b><span class="lbsub">${streakLine(r)}</span></span><span class="lwins c tnum" title="Best streak">${r.wins}</span></div>
+    ${weeks.map((ev) => cellHTML(r, ev)).join('')}</button>`;
 }
 function viewBoard() {
   const st = S.stats || { entries: 0, alive: 0, players: 0 };
-  let h = `<h1 class="h1 c">Leaderboard</h1><p class="lead tnum">${st.alive.toLocaleString()} of ${st.players.toLocaleString()} players still alive</p>`;
+  const weeks = boardWeeks();
+  let h = `<h1 class="h1 c">Leaderboard</h1><p class="lead tnum">${st.alive.toLocaleString()} of ${st.players.toLocaleString()} players on a streak</p>`;
   if (S.myRank) {
-    const r = S.myRank, ranked = S.top.some((x) => x.wins > 0);
-    h += ranked
-      ? `<div class="myrank"><span class="rk c tnum">#${r.rank}</span><span>You're ranked <b>#${r.rank}</b> with <b>${plural(r.wins, 'win')}</b>${r.status === 'out' ? `, out in week ${r.out_week ?? ''}` : ''}.</span></div>`
-      : `<div class="myrank"><span>You're in. Rankings start once the first card is done.</span></div>`;
+    const r = S.myRank;
+    h += r.wins > 0
+      ? `<div class="myrank"><span class="rk c tnum">#${r.rank}</span><span>Your best streak is <b>${r.wins}</b>${r.status === 'alive' && r.current > 0 && r.current !== r.wins ? `. You're on ${r.current} in a row right now` : ''}.</span></div>`
+      : `<div class="myrank"><span>${S.top.some((x) => x.wins > 0) ? 'No wins yet. Win your next pick to climb the board.' : "You're in. Rankings start once the first card is done."}</span></div>`;
   }
-  const filters = [['all', 'All'], ['alive', 'Alive'], ...(S.me?.profile ? [['following', `Following${S.following.size ? ` ${S.following.size}` : ''}`]] : [])];
+  const filters = [['all', 'All'], ['alive', 'On a streak'], ...(S.me?.profile ? [['following', `Following${S.following.size ? ` ${S.following.size}` : ''}`]] : [])];
   h += `<div class="lb-tools"><div class="segc" role="group" aria-label="Show">${filters.map(([k, l]) => `<button data-act="lbfilter" data-f="${k}" aria-pressed="${S.lb.filter === k}">${l}</button>`).join('')}</div>
   <input class="search" id="lbsearch" type="search" placeholder="Find a player" value="${esc(S.lb.q)}" aria-label="Find a player"></div>
   <div class="board">`;
-  h += S.lb.rows.length ? S.lb.rows.map(lrowHTML).join('') : `<div class="empty" style="margin:0;border:0">${S.lb.filter === 'following' ? "You're not following anyone yet. Tap a player to see their profile and follow them." : S.lb.q ? 'No players match.' : 'No players yet. Be the first on the board.'}</div>`;
+  if (S.lb.rows.length) {
+    h += `<div class="lbwrap" id="lbwrap"><div class="lbgrid" style="--n:${weeks.length}"><div class="lg-head"><div class="lg-lead"><span>Player</span><span title="Best streak">Best</span></div>${weeks.map((ev) => `<div class="${ev.id === S.openEvent?.id ? 'cur' : ''}" title="${esc(ev.name)}">${esc(eventShort(ev))}</div>`).join('')}</div>
+      ${S.lb.rows.map((r) => lrowHTML(r, weeks)).join('')}</div></div>`;
+  } else h += `<div class="empty" style="margin:0;border:0">${S.lb.filter === 'following' ? "You're not following anyone yet. Tap a player to see their profile and follow them." : S.lb.q ? 'No players match.' : 'No players yet. Be the first on the board.'}</div>`;
   if (S.lb.rows.length < S.lb.total) h += `<div class="more"><button class="btn btn-ghost btn-sm" data-act="lbmore">Show more</button></div>`;
-  return h + `</div><details class="fine"><summary>How ranking works</summary><p>Most wins first. Alive players rank above eliminated players with the same wins. Then more underdog wins (beating a fighter under 50% to win). Everyone's pick stays hidden until the card starts. Tap any player to see their profile.</p></details>`;
+  return h + `</div><details class="fine"><summary>How ranking works</summary><p>Ranked by your best streak this season: the most wins in a row. Players with the same best streak share a rank. Lose and your streak resets, but you can start a new one the next week. Green is a win, red is a loss. Picks stay hidden until the card starts. Tap any player to see their profile.</p></details>`;
 }
 
 /* ---------- PLAYER PROFILE ---------- */
@@ -1319,10 +1437,10 @@ async function openPlayer(userId) {
   const b = $('#plbody'); if (b) b.innerHTML = playerHTML(S.player);
 }
 function playerHTML(p) {
-  const e = p.entry, cur = S.openEvent?.week_no || 1;
+  const e = p.entry, curW = S.openEvent?.week_no || 1;
   let joined = ''; try { joined = new Date(p.joined_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }); } catch (x) {}
-  const status = !e ? `Not playing ${esc(S.season.name)}` : e.status === 'out' ? `Out in week ${e.out_week ?? '?'}${e.out_reason && e.out_reason !== 'loss' ? ` (${esc(e.out_reason)})` : ''}` : e.start_week > cur ? `Starts week ${e.start_week}` : '';
-  const badge = e ? `<span class="badge ${e.status}">${e.status === 'alive' ? 'Alive' : 'Out'}</span>` : '';
+  const status = !e ? `Not playing ${esc(S.season.name)}` : e.status === 'out' ? `Ended in week ${e.out_week ?? '?'}${e.out_reason && e.out_reason !== 'loss' ? ` (${esc(e.out_reason)})` : ''}` : (e.run_start_week ?? e.start_week) > curW ? `Starts week ${e.run_start_week ?? e.start_week}` : '';
+  const badge = e ? `<span class="badge ${e.status}">${e.status === 'alive' ? 'On a streak' : 'Streak ended'}</span>` : '';
   const soc = (p.instagram ? `<a class="soc" href="https://instagram.com/${encodeURIComponent(p.instagram)}" target="_blank" rel="noopener noreferrer">${I.ig}${esc(p.instagram)}</a>` : '')
     + (p.x_handle ? `<a class="soc" href="https://x.com/${encodeURIComponent(p.x_handle)}" target="_blank" rel="noopener noreferrer">${I.xlogo}${esc(p.x_handle)}</a>` : '');
   const btn = p.is_me ? `<button class="btn btn-ghost btn-sm" data-act="profile">Edit profile</button>`
@@ -1335,19 +1453,20 @@ function playerHTML(p) {
   const shown = (p.picks || []).filter((x) => x.pick_pct != null && x.result !== 'pending');
   const avg = shown.length ? Math.round(shown.reduce((t, x) => t + x.pick_pct, 0) / shown.length) : null;
   const style = avg == null ? 'Pick style' : avg >= 65 ? 'Plays it safe' : avg >= 50 ? 'Balanced' : 'Risk taker';
+  const cur = e.current ?? (e.status === 'alive' ? e.wins : 0), best = e.best ?? e.wins;
   h += `<div class="pl-stats">
-    <div><b class="c tnum">${e.wins}</b><small>${e.status === 'out' ? 'Final streak' : 'Win streak'}${e.wins >= 3 ? ' 🔥' : ''}</small></div>
-    <div><b class="c tnum">${e.wins > 0 && e.rank ? '#' + e.rank : '–'}</b><small>Rank of ${Number(e.players || 0).toLocaleString()}</small></div>
-    <div><b class="c tnum">${e.dog_wins}</b><small>Underdog wins</small></div>
+    <div><b class="c tnum">${cur}</b><small>Current streak${cur >= 3 ? ' 🔥' : ''}</small></div>
+    <div><b class="c tnum">${best}</b><small>Best streak</small></div>
+    <div><b class="c tnum">${best > 0 && e.rank ? '#' + e.rank : '–'}</b><small>Rank of ${Number(e.players || 0).toLocaleString()}</small></div>
     <div><b class="c tnum">${avg == null ? '–' : avg + '%'}</b><small>${style}</small></div></div>`;
   if (p.boldest) h += `<div class="pl-bold">${avatarHTML(p.boldest.headshot_url, p.boldest.fighter_name, 'm')}<span>Boldest win: <b>${esc(p.boldest.fighter_name)}</b> at ${p.boldest.pick_pct}% to win, week ${p.boldest.week_no}</span></div>`;
-  const last = e.status === 'out' ? (e.out_week || cur) : Math.max(e.start_week, cur);
   const byWeek = Object.fromEntries((p.picks || []).map((x) => [x.week_no, x]));
+  const last = Math.max(e.status === 'out' ? (e.out_week || 1) : Math.max(e.run_start_week ?? e.start_week, curW), ...(p.picks || []).map((x) => x.week_no || 0));
   const chips = [];
   for (let w = e.start_week; w <= last; w++) {
     const x = byWeek[w];
     if (x) chips.push(`<span class="wk ${x.result === 'pending' ? 'pend' : x.result}" title="Week ${w}: ${esc(x.fighter_name || '')}${x.pick_pct != null ? ` (${x.pick_pct}% to win)` : ''}">${avatarHTML(x.headshot_url, x.fighter_name)}W${w}</span>`);
-    else if (w === cur && e.status === 'alive' && !openLocked()) chips.push(`<span class="wk hid" title="Hidden until the card starts"><span class="av">${I.lock}</span>W${w}</span>`);
+    else if (w === curW && e.status === 'alive' && !openLocked()) chips.push(`<span class="wk hid" title="Hidden until the card starts"><span class="av">${I.lock}</span>W${w}</span>`);
     else chips.push(`<span class="wk none"><span class="av"></span>W${w}</span>`);
   }
   h += `<div class="pl-sec">Picks</div><div class="weeks">${chips.join('')}</div>`;
@@ -1361,8 +1480,8 @@ function viewAdmin() {
   let h = `<h1 class="h1 c">Admin</h1><span class="adm-note">${I.lock}Only admins can see this tab</span>`;
   if (!ov) return h + `<div class="empty"><b>Loading admin data</b></div>`;
   const ev = ov.event;
-  const tiles = [[ov.profiles, 'Players', ov.new_24h ? `+${ov.new_24h} today` : ''], [ov.alive, 'Alive'], [ov.out, 'Out'],
-    [ov.picks_made, ev ? `Picks for week ${ev.week_no}` : 'Picks'], [ov.need_pick, 'Still need to pick', '', ov.need_pick > 0 && ev && !ev.locked ? 'warn' : ''], [ov.with_socials, 'Added IG or X']];
+  const tiles = [[ov.profiles, 'Players', ov.new_24h ? `+${ov.new_24h} today` : ''], [ov.alive, 'On a streak'], [ov.out, 'Streak ended', ov.restarts ? `${ov.restarts} restarted` : ''],
+    [ov.picks_made, ev ? `Picks for week ${ev.week_no}` : 'Picks'], [ov.need_pick, 'Still need to pick', '', ov.need_pick > 0 && ev && !ev.locked ? 'warn' : ''], [ov.phones ?? 0, 'Phone numbers', ov.with_socials ? `${ov.with_socials} added IG or X` : '']];
   h += `<div class="tiles">${tiles.map(([n, l, sub, cls]) => `<div class="tile ${cls || ''}"><b class="c tnum">${Number(n || 0).toLocaleString()}</b><small>${esc(l)}${sub ? ` · ${esc(sub)}` : ''}</small></div>`).join('')}</div>`;
   if (ev) {
     const split = ov.split || [], showAll = S.admin.allSplit || split.length <= 7;
@@ -1372,24 +1491,24 @@ function viewAdmin() {
   }
   const f = S.admin.filter, qq = S.admin.q.toLowerCase();
   let rows = S.admin.players.filter((r) => f === 'nopick' ? (r.status === 'alive' && !r.pick_fighter && (r.start_week ?? 99) <= (ev?.week_no ?? 0)) : f === 'out' ? r.status === 'out' : true);
-  if (qq) rows = rows.filter((r) => [r.username, r.email, r.instagram, r.x_handle].some((v) => String(v || '').toLowerCase().includes(qq)));
-  h += `<div class="lb-tools"><div class="segc" role="group" aria-label="Show">${[['all', 'All'], ['nopick', 'No pick'], ['out', 'Out']].map(([k, l]) => `<button data-act="adfilter" data-f="${k}" aria-pressed="${f === k}">${l}</button>`).join('')}</div>
-    <input class="search" id="adsearch" type="search" placeholder="Search name, email, IG or X" value="${esc(S.admin.q)}" aria-label="Search players">
-    <button class="btn btn-ghost btn-sm" data-act="adcsv">Export CSV</button><button class="btn btn-ghost btn-sm" data-act="adrefresh">Refresh</button></div>`;
+  if (qq) rows = rows.filter((r) => [r.username, r.email, r.instagram, r.x_handle, r.phone].some((v) => String(v || '').toLowerCase().includes(qq)));
+  h += `<div class="lb-tools"><div class="segc" role="group" aria-label="Show">${[['all', 'All'], ['nopick', 'No pick'], ['out', 'Streak ended']].map(([k, l]) => `<button data-act="adfilter" data-f="${k}" aria-pressed="${f === k}">${l}</button>`).join('')}</div>
+    <input class="search" id="adsearch" type="search" placeholder="Search name, email, phone, IG or X" value="${esc(S.admin.q)}" aria-label="Search players">
+    ${FORCE_DEMO ? '' : '<button class="btn btn-ghost btn-sm" data-act="adcsv">Export CSV</button>'}<button class="btn btn-ghost btn-sm" data-act="adrefresh">Refresh</button></div>`;
   h += `<div class="board">${rows.length ? rows.slice(0, S.admin.limit).map(arowHTML).join('') : '<div class="empty" style="margin:0;border:0">No players match.</div>'}`;
   if (rows.length > S.admin.limit) h += `<div class="more"><button class="btn btn-ghost btn-sm" data-act="admore">Show more (${(rows.length - S.admin.limit).toLocaleString()})</button></div>`;
   return h + `</div><p class="muted" style="font-size:13px;margin:10px 2px 0">${rows.length.toLocaleString()} of ${S.admin.players.length.toLocaleString()} players. Tap a player to see their full profile, including this week's pick.</p>`;
 }
 function arowHTML(r) {
   const soc = [r.instagram && `IG @${r.instagram}`, r.x_handle && `X @${r.x_handle}`].filter(Boolean).join(' · ');
-  const st = !r.entry_id ? 'Not joined this season' : r.status === 'out' ? `Out in week ${r.out_week ?? ''} · ${plural(r.wins || 0, 'win')}` : `Alive · ${plural(r.wins || 0, 'win')}`;
+  const st = !r.entry_id ? 'No picks yet' : `${r.status === 'out' ? `Streak ended in week ${r.out_week ?? ''}` : `${r.wins || 0} in a row`}, best ${r.best ?? r.wins ?? 0}${r.runs > 1 ? `, ${r.runs} streaks` : ''}`;
   const pk = r.pick_fighter ? `<span class="pk">${avatarHTML(r.pick_headshot, r.pick_fighter, 's')}<span>${esc(r.pick_last_name || r.pick_fighter)}<small>${r.pick_pct != null ? r.pick_pct + '%' : ''}</small></span></span>`
     : r.entry_id && r.status === 'alive' ? '<span class="pk none">No pick</span>' : '';
-  return `<button class="arow" data-act="player" data-user="${esc(r.user_id)}">${avatarHTML(r.avatar_url, r.username, 'm')}<span class="t"><b>${esc(r.username)}</b><small>${esc(r.email || '')}</small><small>${esc(st)}${soc ? ` · ${esc(soc)}${r.socials_public === false ? ' (hidden)' : ''}` : ''}</small></span>${pk}</button>`;
+  return `<button class="arow" data-act="player" data-user="${esc(r.user_id)}">${avatarHTML(r.avatar_url, r.username, 'm')}<span class="t"><b>${esc(r.username)}</b><small>${esc(r.email || '')}${r.phone ? ` · ${esc(r.phone)}` : ''}</small><small>${esc(st)}${soc ? ` · ${esc(soc)}${r.socials_public === false ? ' (hidden)' : ''}` : ''}</small></span>${pk}</button>`;
 }
 function adminCSV() {
-  const cols = [['username', 'username'], ['email', 'email'], ['instagram', 'instagram'], ['x', 'x_handle'], ['socials_public', 'socials_public'], ['joined', 'joined_at'],
-    ['status', 'status'], ['wins', 'wins'], ['underdog_wins', 'dog_wins'], ['start_week', 'start_week'], ['out_week', 'out_week'], ['out_reason', 'out_reason'],
+  const cols = [['username', 'username'], ['email', 'email'], ['phone', 'phone'], ['instagram', 'instagram'], ['x', 'x_handle'], ['socials_public', 'socials_public'], ['joined', 'joined_at'],
+    ['status', 'status'], ['current_streak', 'wins'], ['best_streak', 'best'], ['streaks', 'runs'], ['underdog_wins', 'dog_wins'], ['start_week', 'start_week'], ['out_week', 'out_week'], ['out_reason', 'out_reason'],
     ['this_week_pick', 'pick_fighter'], ['pick_win_pct', 'pick_pct'], ['picked_at', 'picked_at'], ['followers', 'followers']];
   const cell = (v) => { let s = v == null ? '' : String(v); if (/^[=+\-@]/.test(s)) s = "'" + s; return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
   const csv = [cols.map((c) => c[0]).join(','), ...S.admin.players.map((r) => cols.map((c) => cell(r[c[1]])).join(','))].join('\n');
@@ -1403,35 +1522,39 @@ function adminCSV() {
 const prizeText = (p) => (p && typeof p.prize === 'string' && p.prize.trim()) ? p.prize.trim() : null;
 function viewRules() {
   const tiers = S.prizes.filter((p) => p.wins > 0).sort((a, b) => a.wins - b.wins), champ = S.prizes.find((p) => p.wins === 0);
-  return `<h1 class="h1 c">How it works</h1><p class="lead">${esc(S.season.name)} runs for ${S.season.weeks} UFC events.</p>
-  <div class="prizes">${[...tiers, champ].some((p) => p && !prizeText(p)) ? `<div class="tease"><b>Prizes drop soon 👀</b><span>We're cooking something big. The longer you survive, the more you unlock.</span></div>` : ''}
-  ${tiers.map((t) => `<div class="prize"><span class="n c tnum">${t.wins}<small>wins</small></span><span><b>${esc(t.title)}</b>${prizeText(t) ? `<span>${esc(prizeText(t))}</span>` : `<span class="soon">${I.lock}Revealed soon</span>`}</span></div>`).join('')}
-  ${champ ? `<div class="prize champ"><span class="n c">#1</span><span><b>${esc(champ.title)}</b><span>${prizeText(champ) ? `${esc(prizeText(champ))}. ` : '<span class="soon">Revealed soon.</span> '}Most wins after the last week.</span></span></div>` : ''}</div>
+  const first = tiers[0];
+  return `<h1 class="h1 c">How it works</h1><p class="lead">${esc(S.season.name)} runs for ${S.season.weeks} UFC events. Build the longest streak you can.</p>
+  <div class="prizes">${[...tiers, champ].some((p) => p && !prizeText(p)) ? `<div class="tease"><b>Prizes start at ${first ? first.wins : 10} in a row 👀</b><span>We're cooking something big. Hit a ${first ? first.wins : 10}-fight streak to unlock the first prize, then keep going for more.</span></div>` : ''}
+  ${tiers.map((t) => `<div class="prize"><span class="n c tnum">${t.wins}<small>in a row</small></span><span>${t.title && t.title.toLowerCase() !== `${t.wins} in a row` ? `<b>${esc(t.title)}</b>` : `<b>${t.wins}-fight streak</b>`}${prizeText(t) ? `<span>${esc(prizeText(t))}</span>` : `<span class="soon">${I.lock}Revealed soon</span>`}</span></div>`).join('')}
+  ${champ ? `<div class="prize champ"><span class="n c">#1</span><span><b>${esc(champ.title)}</b><span>${prizeText(champ) ? `${esc(prizeText(champ))}. ` : '<span class="soon">Revealed soon.</span> '}Longest streak of the season.</span></span></div>` : ''}</div>
   <h2 class="h2 c">Rules</h2>
   <ul class="rules">
     <li><b>Pick one fighter every UFC card</b> to win. Any fight on the card counts.</li>
-    <li><b>Win and you survive.</b> Lose and you're out for the rest of the season.</li>
-    <li><b>One entry per player.</b> Join late and you start from the next card with 0 wins.</li>
-    <li><b>Picks lock when the first fight starts</b>, early prelims included. Change your pick as often as you like before then. No pick by then and you're out.</li>
-    <li><b>Picks are secret</b> until the card starts. Then everyone's pick is shown.</li>
+    <li><b>Win and your streak grows.</b> Lose and it resets to 0.</li>
+    <li><b>Lost? You're straight back in.</b> Make next week's pick and a new streak starts. Join any week.</li>
+    <li><b>The leaderboard ranks your best streak</b> this season. Players with the same best streak share a rank.</li>
+    <li><b>Picks lock when the first fight starts</b>, early prelims included. Change your pick as often as you like before then. No pick by then and your streak ends.</li>
+    <li><b>Picks are secret</b> until the card starts. Then everyone's pick shows on the leaderboard.</li>
+    <li><b>Hit 3 in a row</b> and we'll ask for your phone number so we can reach you about prizes. You need it to keep your streak going.</li>
     <li><b>Win %</b> next to each fighter is their chance to win based on the betting odds. It updates until the card starts.</li>
     <li><b>Draw, no contest or cancelled fight</b> counts as a loss. Your fighter has to win. If your fight is cancelled before lock, switch your pick.</li>
   </ul>
-  <details class="fine"><summary>Fine print</summary><p>Prizes and how they are awarded will be announced by Home of Fight before anything is given out. Each milestone counts once per player. Results come from ESPN and are graded automatically; corrections within 72 hours are applied, then results are final. If the UFC cancels a whole event, that week doesn't count. Profile photos must be of you or something you have the right to use; Home of Fight can remove any photo. Free to play, no purchase necessary. One account per person; duplicate accounts are disqualified. You must be 18 or older to receive a prize, and Home of Fight may verify identity before awarding one. Home of Fight's decisions are final. Not affiliated with the UFC or ESPN.</p></details>`;
+  <details class="fine"><summary>Fine print</summary><p>Prizes and how they are awarded will be announced by Home of Fight before anything is given out. Each milestone counts once per player. Results come from ESPN and are graded automatically; corrections within 72 hours are applied, then results are final. If the UFC cancels a whole event, that week doesn't count. Phone numbers are only used by Home of Fight to contact you about the game and prizes. Profile photos must be of you or something you have the right to use; Home of Fight can remove any photo. Free to play, no purchase necessary. One account per person; duplicate accounts are disqualified. You must be 18 or older to receive a prize, and Home of Fight may verify identity before awarding one. Home of Fight's decisions are final. Not affiliated with the UFC or ESPN.</p></details>`;
 }
 
 /* ---------- SIDE PANEL (desktop) ---------- */
 function viewAside() {
   let h = '';
-  if (S.me?.profile && S.entry) {
-    const e = S.entry, p = S.openEvent && pickFor(S.openEvent.id);
+  if (S.me?.profile) {
+    const e = S.entry, p = S.openEvent && pickFor(S.openEvent.id), alive = e?.status === 'alive';
+    const sub = !e ? 'Make your first pick' : !alive ? 'Streak ended. Make a pick to start again' : p ? `This week: ${esc(lastName(p.fighter))}` : e.start_week > (S.openEvent?.week_no ?? 0) ? `Starts week ${e.start_week}` : 'No pick yet this week';
     h += `<div class="panel"><h3 class="c">My season <button data-act="tab" data-tab="season">Details</button></h3>
-      <div class="prow">${avatarHTML(S.me.profile.avatar_url, S.me.profile.username, 'm')}<span class="t">${esc(S.me.profile.username)}<small>${e.status === 'out' ? `Out in week ${e.out_week ?? ''}` : p ? `This week: ${esc(lastName(p.fighter))}` : e.start_week > (S.openEvent?.week_no ?? 0) ? `Starts week ${e.start_week}` : 'No pick yet this week'}</small></span><span class="w c tnum">${e.wins}</span></div></div>`;
+      <div class="prow">${avatarHTML(S.me.profile.avatar_url, S.me.profile.username, 'm')}<span class="t">${esc(S.me.profile.username)}<small>${sub}</small></span><span class="w c tnum" title="Current streak">${alive ? e.wins : 0}</span></div></div>`;
   }
   const st = S.stats || { alive: 0, players: 0 };
   const any = S.top.some((x) => x.wins > 0);
-  h += `<div class="panel"><h3 class="c">${any ? 'Top 5' : 'Players'} <button data-act="tab" data-tab="board">Full board</button></h3>${S.top.length ? S.top.map((r) => `<button class="prow" data-act="player" data-user="${esc(r.user_id)}"><span class="c tnum" style="width:18px;text-align:center">${rankOf(r, S.top)}</span>${avatarHTML(r.avatar_url, r.username, 'm')}<span class="t">${esc(r.username)}<small>${r.status === 'out' ? 'Out' : 'Alive'}</small></span><span class="w c tnum">${r.wins}</span></button>`).join('') : '<p class="muted" style="margin:0">No players yet.</p>'}
-    <p class="muted tnum" style="margin:10px 0 0;font-size:13px">${st.alive.toLocaleString()} of ${st.players.toLocaleString()} players alive</p></div>`;
+  h += `<div class="panel"><h3 class="c">${any ? 'Top 5' : 'Players'} <button data-act="tab" data-tab="board">Full board</button></h3>${S.top.length ? S.top.map((r) => `<button class="prow" data-act="player" data-user="${esc(r.user_id)}"><span class="c tnum" style="width:18px;text-align:center">${rankOf(r)}</span>${avatarHTML(r.avatar_url, r.username, 'm')}<span class="t">${esc(r.username)}<small>${streakLine(r)}</small></span><span class="w c tnum" title="Best streak">${r.wins}</span></button>`).join('') : '<p class="muted" style="margin:0">No players yet.</p>'}
+    <p class="muted tnum" style="margin:10px 0 0;font-size:13px">${st.alive.toLocaleString()} of ${st.players.toLocaleString()} players on a streak</p></div>`;
   return h;
 }
 
@@ -1462,7 +1585,7 @@ function openDialog(html) {
 function closeDialog() { const root = $('#sheetroot'); delete root.dataset.kind; root.innerHTML = ''; renderSheet(); }
 
 function authDialog(mode = 'up') {
-  openDialog(`<img class="dlg-logo" src="${LOGO_MAIN}" alt="MMA Survivor"><h3 class="c" style="text-align:center">${mode === 'up' ? 'Join MMA Survivor' : 'Welcome back'}</h3><p class="sub" style="text-align:center">${mode === 'up' ? 'Free to play. One entry per season.' : 'Log in to make your pick.'}</p>
+  openDialog(`<img class="dlg-logo" src="${LOGO_MAIN}" alt="MMA Survivor"><h3 class="c" style="text-align:center">${mode === 'up' ? 'Join MMA Survivor' : 'Welcome back'}</h3><p class="sub" style="text-align:center">${mode === 'up' ? "Free to play. Lose a week and you're straight back in." : 'Log in to make your pick.'}</p>
     <div class="tabs2"><button data-act="auth" data-mode="up" aria-pressed="${mode === 'up'}">Sign up</button><button data-act="auth" data-mode="in" aria-pressed="${mode === 'in'}">Log in</button></div>
     <form id="authform" data-mode="${mode}" novalidate>
       <div class="field"><label for="au-email">Email</label><input id="au-email" type="email" autocomplete="email" required></div>
@@ -1486,59 +1609,188 @@ function profileDialog() {
       <div class="field"><label for="pf-name">Username</label><input id="pf-name" maxlength="20" autocomplete="nickname" value="${esc(p?.username || '')}" required><span class="hint">3–20 letters, numbers, _ or .</span></div>
       ${p ? `<div class="two"><div class="field"><label for="pf-ig">Instagram</label><div class="handle"><span>@</span><input id="pf-ig" maxlength="80" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="username" value="${esc(S.socials?.instagram || '')}"></div></div>
       <div class="field"><label for="pf-x">X</label><div class="handle"><span>@</span><input id="pf-x" maxlength="80" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="username" value="${esc(S.socials?.x_handle || '')}"></div></div></div>
-      <label class="switch"><input type="checkbox" id="pf-pub" ${S.socials?.is_public === false ? '' : 'checked'}><span>Show my Instagram and X on my profile</span></label>` : ''}
+      <label class="switch"><input type="checkbox" id="pf-pub" ${S.socials?.is_public === false ? '' : 'checked'}><span>Show my Instagram and X on my profile</span></label>
+      <div class="field"><label for="pf-phone">Phone number <span style="font-weight:500;color:var(--muted)">(private)</span></label><input id="pf-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+1 305 555 0123" value="${esc(S.phone || '')}"><span class="hint">Only Home of Fight sees it. We ask for it once you hit 3 in a row.</span></div>` : ''}
       <div class="err" id="pf-err"></div>
-      <button class="btn btn-dark" type="submit" style="width:100%">${p ? 'Save profile' : (S.entry || S.season?.status === 'complete' ? 'Create profile' : 'Join the season')}</button>
+      <button class="btn btn-dark" type="submit" style="width:100%">${p ? 'Save profile' : 'Create profile'}</button>
     </form>${S.me ? `<p style="text-align:center;margin:14px 0 0;display:flex;gap:18px;justify-content:center">${p ? `<button class="link" data-act="player" data-user="${esc(S.me.user.id)}">See my profile</button>` : ''}<button class="link" data-act="signout">Sign out</button></p>` : ''}`);
+}
+const cleanPhone = (v) => { let p = String(v || '').replace(/[^0-9+]/g, ''); if (p.startsWith('00')) p = '+' + p.slice(2); return /^\+?\d{7,15}$/.test(p) ? p : null; };
+function phoneDialog(resume = false) {
+  const e = S.entry;
+  openDialog(`<h3 class="c">Add your phone number</h3><p class="sub">${e?.status === 'alive' && e.wins >= 3 ? `You're on ${e.wins} in a row. ` : ''}We need a number to reach you about prizes. Only Home of Fight sees it.</p>
+    <form id="phoneform" data-resume="${resume ? 1 : 0}" novalidate>
+      <div class="field"><label for="ph-num">Phone number</label><input id="ph-num" type="tel" inputmode="tel" autocomplete="tel" placeholder="+1 305 555 0123" value="${esc(S.phone || '')}" required><span class="hint">Include your country code.</span></div>
+      <div class="err" id="ph-err"></div>
+      <button class="btn btn-dark" type="submit" style="width:100%">${resume ? 'Save and lock in my pick' : 'Save phone number'}</button>
+    </form>`);
 }
 function passwordDialog() {
   openDialog(`<h3 class="c">Set a new password</h3><p class="sub">Choose a new password for your account.</p>
     <form id="pwform" novalidate><div class="field"><label for="pw-new">New password</label><input id="pw-new" type="password" autocomplete="new-password" minlength="6" required></div><div class="err" id="pw-err"></div><button class="btn btn-dark" type="submit" style="width:100%">Save password</button></form>`);
 }
 
-/* ---------- share image (1080×1350, HOF graphic) ---------- */
-function loadImg(src, cors = true) {
+/* ---------- share image: this week's pick, streak, username and handles (HOF graphic) ---------- */
+const FONT_DATA = { 900: ['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'], 800: ['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'] };
+const FONT_RANGES = [
+  'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD',
+  'U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF'
+];
+let shareFonts = null;
+function loadShareFonts() {
+  if (shareFonts) return shareFonts;
+  const buf = (b64) => { const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer; };
+  shareFonts = Promise.all(Object.entries(FONT_DATA).flatMap(([w, parts]) => parts.map(async (b64, i) => {
+    try { const f = new FontFace('HOF XC', buf(b64), { weight: w, unicodeRange: FONT_RANGES[i] }); await f.load(); document.fonts.add(f); } catch (e) {}
+  })));
+  return shareFonts;
+}
+function loadImg(src, cors = true, ms = 8000) {
   return new Promise((res) => {
     if (!src) return res(null);
     const im = new Image(); if (cors) im.crossOrigin = 'anonymous';
-    const t = setTimeout(() => res(null), 4000);
+    const t = setTimeout(() => res(null), ms);
     im.onload = () => { clearTimeout(t); res(im); }; im.onerror = () => { clearTimeout(t); res(null); };
     im.src = src;
   });
 }
+const readable = (im) => { try { const c = document.createElement('canvas'); c.width = c.height = 2; const x = c.getContext('2d'); x.drawImage(im, 0, 0, 2, 2); x.getImageData(0, 0, 1, 1); return true; } catch (e) { return false; } };
+// a photo the canvas is allowed to export: straight from the source, or through an image relay that adds the permission
+async function exportableImg(url) {
+  if (!url) return null;
+  if (/^(data|blob):/.test(url)) return loadImg(url, false);
+  for (const u of [url, `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=png`]) { const im = await loadImg(u, true); if (im && readable(im)) return im; }
+  return null;
+}
+function trimAlpha(im) {
+  const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight;
+  const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(im, 0, 0);
+  let d; try { d = x.getImageData(0, 0, c.width, c.height).data; } catch (e) { return null; }
+  let x0 = c.width, y0 = c.height, x1 = -1, y1 = -1;
+  for (let y = 0; y < c.height; y += 2) for (let xx = 0; xx < c.width; xx += 2) if (d[(y * c.width + xx) * 4 + 3] > 24) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 < 0) return null;
+  x0 = Math.max(0, x0 - 2); y0 = Math.max(0, y0 - 2);
+  const o = document.createElement('canvas'); o.width = Math.min(c.width - x0, x1 - x0 + 4); o.height = Math.min(c.height - y0, y1 - y0 + 4);
+  o.getContext('2d', { willReadFrequently: true }).drawImage(c, x0, y0, o.width, o.height, 0, 0, o.width, o.height);
+  return o;
+}
+// where the head is (top, height, center), so every photo crop comes out the same size
+function headOf(c) {
+  const w = c.width, h = c.height;
+  let d; try { d = c.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, w, h).data; } catch (e) { return null; }
+  const op = (x, y) => d[(y * w + x) * 4 + 3] > 110;
+  let y0 = -1, cx = w / 2;
+  for (let y = 0; y < h && y0 < 0; y++) { let sx = 0, n = 0; for (let x = 0; x < w; x++) if (op(x, y)) { sx += x; n++; } if (n >= 3) { y0 = y; cx = sx / n; } }
+  if (y0 < 0) return null;
+  const rows = []; let track = cx;
+  for (let y = y0; y < Math.min(h, y0 + Math.round(h * 0.65)); y++) {
+    let x = Math.round(track);
+    if (!op(x, y)) { let f = -1; for (let k = 1; k < 80; k++) { if (x - k >= 0 && op(x - k, y)) { f = x - k; break; } if (x + k < w && op(x + k, y)) { f = x + k; break; } } if (f < 0) { rows.push(null); continue; } x = f; }
+    let l = x, r = x; while (l > 0 && op(l - 1, y)) l--; while (r < w - 1 && op(r + 1, y)) r++;
+    rows.push({ dy: y - y0, w: r - l + 1, mid: (l + r) / 2 }); track = track * 0.65 + ((l + r) / 2) * 0.35;
+  }
+  const valid = rows.filter(Boolean); if (valid.length < 10) return null;
+  const at = (dy) => { for (let k = 0; k < 4; k++) { const r = rows[dy + k] || rows[dy - k]; if (r) return r.w; } return null; };
+  const shape = (k) => { const t = 1 - k / 0.62; return Math.sqrt(Math.max(0, 1 - t * t)); };
+  const maxW = Math.max(...valid.map((r) => r.w));
+  let hw = null, best = Infinity;
+  for (let c2 = 16; c2 <= maxW; c2 += Math.max(1, Math.round(maxW / 300))) {
+    let e = 0, n = 0; for (const k of [0.06, 0.1, 0.14, 0.18, 0.22, 0.26, 0.3, 0.34, 0.38]) { const v = at(Math.round(k * c2)); if (v == null) continue; e += (v / c2 - shape(k)) ** 2; n++; }
+    if (n >= 6 && e / n < best) { best = e / n; hw = c2; }
+  }
+  if (!hw || best > 0.05) return null;
+  let headH = hw * 1.35;
+  const span = valid.filter((r) => r.dy >= hw * 1.05 && r.dy <= hw * 1.75);
+  if (span.length) { const neck = span.reduce((a, b) => (b.w < a.w ? b : a)); if (neck.w < hw * 0.92) headH = neck.dy; }
+  const top = valid.filter((r) => r.dy <= hw * 0.7);
+  return { top: y0, headH, cx: top.reduce((a, r) => a + r.mid, 0) / Math.max(1, top.length) };
+}
+const SHARE = { fmt: store.get('hof-survivor-sharefmt', TOUCH ? 'story' : 'post'), data: null, url: null };
+function drawShare(fmt, D) {
+  const story = fmt === 'story', W = 1080, H = story ? 1920 : 1350;
+  const L = story
+    ? { logo: { w: 250, y: 200 }, tag: { y: 520, size: 40 }, f: { top: 586, head: 232 }, oct: { cy: 980, r: 450 }, fade: [1130, 1440], name: { y: 1408, size: 176 }, who: { y: 1555, av: 62, user: 58, hand: 34, num: 124, lab: 30 }, foot: { y: 1700, size: 32 } }
+    : { logo: { w: 190, y: 28 }, tag: { y: 252, size: 34 }, f: { top: 300, head: 180 }, oct: { cy: 640, r: 360 }, fade: [760, 1010], name: { y: 990, size: 140 }, who: { y: 1108, av: 50, user: 48, hand: 28, num: 100, lab: 26 }, foot: { y: 1300, size: 28 } };
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  const F = (wt, s) => `${wt} ${Math.round(s)}px "HOF XC", "Arial Narrow", Arial, sans-serif`;
+  const gold = (g, y0, y1) => { const gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, '#fff3c4'); gr.addColorStop(0.42, '#e6c560'); gr.addColorStop(0.58, '#cd9f33'); gr.addColorStop(1, '#94701d'); return gr; };
+  const text = (t, px, py, size, { color = '#fff', wt = 900, align = 'center', maxW = W - 100, shadow = 0 } = {}) => {
+    if (!t) return; x.save(); x.font = F(wt, size); let w = x.measureText(t).width; if (w > maxW) { size *= maxW / w; x.font = F(wt, size); }
+    x.textAlign = align; x.textBaseline = 'alphabetic'; x.fillStyle = color === 'gold' ? gold(x, py - size * 0.72, py) : color;
+    if (shadow) { x.shadowColor = 'rgba(0,0,0,.9)'; x.shadowBlur = shadow; } x.fillText(t, px, py); x.restore();
+  };
+  // background: black, warm light from above, gold glow behind the fighter
+  x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+  let g = x.createRadialGradient(W / 2, -H * 0.1, 0, W / 2, -H * 0.1, H * 0.75); g.addColorStop(0, 'rgba(255,238,200,.2)'); g.addColorStop(1, 'rgba(255,238,200,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  g = x.createRadialGradient(W / 2, L.oct.cy - L.oct.r * 0.3, 0, W / 2, L.oct.cy - L.oct.r * 0.3, L.oct.r * 1.3); g.addColorStop(0, 'rgba(212,175,55,.42)'); g.addColorStop(0.5, 'rgba(212,175,55,.11)'); g.addColorStop(1, 'rgba(212,175,55,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  if (D.logo) { const w = L.logo.w, h = D.logo.height * w / D.logo.width; x.drawImage(D.logo, (W - w) / 2, L.logo.y, w, h); }
+  // gold tag
+  const tag = `MY WEEK ${D.week} PICK`; x.font = F(900, L.tag.size); const tw = x.measureText(tag).width, bw = tw + L.tag.size * 1.2, bh = L.tag.size * 1.42;
+  x.fillStyle = gold(x, L.tag.y - bh / 2, L.tag.y + bh / 2); x.fillRect((W - bw) / 2, L.tag.y - bh / 2, bw, bh);
+  text(tag, W / 2, L.tag.y + L.tag.size * 0.36, L.tag.size, { color: '#000' });
+  // octagon + fighter on one layer that fades out toward the name
+  const lc = document.createElement('canvas'); lc.width = W; lc.height = H; const lg = lc.getContext('2d');
+  lg.beginPath(); for (let i = 0; i < 8; i++) { const a = Math.PI / 8 + i * Math.PI / 4; const px = W / 2 + L.oct.r * Math.cos(a), py = L.oct.cy + L.oct.r * Math.sin(a); i ? lg.lineTo(px, py) : lg.moveTo(px, py); } lg.closePath();
+  lg.lineWidth = L.oct.r * 0.03; lg.strokeStyle = gold(lg, L.oct.cy - L.oct.r, L.oct.cy + L.oct.r); lg.globalAlpha = 0.85; lg.stroke(); lg.globalAlpha = 1;
+  if (D.photo) {
+    const im = D.photo, f = D.fig, k = f ? L.f.head / f.headH : (L.f.head * 4.4) / im.height;
+    const w = im.width * k, h = im.height * k, px = W / 2 - (f ? f.cx : im.width / 2) * k, py = L.f.top - (f ? f.top : 0) * k;
+    const tc = document.createElement('canvas'); tc.width = W; tc.height = H; const tg = tc.getContext('2d');
+    if (D.flip) { tg.save(); tg.translate(px + w, py); tg.scale(-1, 1); tg.drawImage(im, 0, 0, w, h); tg.restore(); } else tg.drawImage(im, px, py, w, h);
+    tg.globalCompositeOperation = 'destination-in'; const fl = Math.min(h * 0.22, L.f.head * 1.4); const m0 = tg.createLinearGradient(0, py + h - fl, 0, py + h); m0.addColorStop(0, '#000'); m0.addColorStop(1, 'rgba(0,0,0,0)'); tg.fillStyle = m0; tg.fillRect(0, 0, W, H);
+    lg.save(); lg.shadowColor = 'rgba(240,205,110,.55)'; lg.shadowBlur = L.f.head * 0.22; lg.drawImage(tc, 0, 0); lg.restore();
+    lg.save(); lg.shadowColor = 'rgba(0,0,0,.55)'; lg.shadowBlur = L.f.head * 0.35; lg.drawImage(tc, 0, 0); lg.restore();
+  } else text(initials(D.name), W / 2, L.oct.cy + L.oct.r * 0.3, L.oct.r * 0.8, { color: 'gold' });
+  lg.globalCompositeOperation = 'destination-in'; const m = lg.createLinearGradient(0, L.fade[0], 0, L.fade[1]); m.addColorStop(0, '#000'); m.addColorStop(0.55, 'rgba(0,0,0,.5)'); m.addColorStop(1, 'rgba(0,0,0,0)'); lg.fillStyle = m; lg.fillRect(0, 0, W, H);
+  x.drawImage(lc, 0, 0);
+  g = x.createLinearGradient(0, L.fade[0], 0, H); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.45, 'rgba(0,0,0,.6)'); g.addColorStop(1, 'rgba(0,0,0,.96)'); x.fillStyle = g; x.fillRect(0, L.fade[0], W, H - L.fade[0]);
+  text(D.last.toUpperCase(), W / 2, L.name.y, L.name.size, { shadow: 34, maxW: W - 90 });
+  // the player: photo, username, handles, streak
+  const wy = L.who.y, ar = L.who.av, ax = 80 + ar;
+  x.save(); x.beginPath(); x.arc(ax, wy, ar, 0, Math.PI * 2); x.closePath(); x.fillStyle = D.avatar ? '#111' : '#2a2618'; x.fill(); x.clip();
+  if (D.avatar) { const s = Math.min(D.avatar.width, D.avatar.height); x.drawImage(D.avatar, (D.avatar.width - s) / 2, (D.avatar.height - s) / 2, s, s, ax - ar, wy - ar, ar * 2, ar * 2); }
+  else text(initials(D.user), ax, wy + ar * 0.36, ar, { color: 'gold' });
+  x.restore(); x.beginPath(); x.arc(ax, wy, ar, 0, Math.PI * 2); x.lineWidth = 4; x.strokeStyle = '#d4af37'; x.stroke();
+  const tx = ax + ar + 26, right = W - 80;
+  const streakW = D.streak > 0 ? 210 : 260;
+  text(D.user, tx, wy + (D.handles ? -4 : L.who.user * 0.36), L.who.user, { align: 'left', maxW: right - streakW - tx });
+  if (D.handles) text(D.handles, tx, wy + L.who.hand + 10, L.who.hand, { color: '#d4af37', wt: 800, align: 'left', maxW: right - streakW - tx });
+  if (D.streak > 0) { text(String(D.streak), right, wy + L.who.num * 0.3, L.who.num, { color: 'gold', align: 'right' }); text('IN A ROW', right, wy + L.who.num * 0.3 + L.who.lab * 1.4, L.who.lab, { align: 'right', wt: 800 }); }
+  else text('NEW STREAK', right, wy + L.who.lab * 0.5, L.who.lab * 1.3, { color: 'gold', align: 'right' });
+  // footer
+  if (D.word) { const h = L.foot.size * 1.02, w = D.word.width * h / D.word.height; x.drawImage(D.word, 56, L.foot.y - h * 0.86, w, h); }
+  text('PLAY FREE AT HOMEOFFIGHT.COM/SURVIVOR', W - 56, L.foot.y, L.foot.size, { color: '#d4af37', wt: 800, align: 'right', maxW: W - 360 });
+  return c;
+}
+const canShareFiles = () => { try { return !!(navigator.canShare && navigator.canShare({ files: [new File([new Blob(['x'])], 'x.png', { type: 'image/png' })] })); } catch (e) { return false; } };
 async function shareCard() {
   const e = S.entry, ev = S.openEvent;
-  const p = e && pickFor(ev.id); if (!p) return;
-  const f = S.fights.find((x) => x.id === p.fight_id);
-  const me = p.fighter, opp = f ? (f.a?.id === me.id ? f.b : f.a) : null;
-  try { await document.fonts.load('800 80px Archivo'); } catch (err) {}
-  const [word, photo] = await Promise.all([loadImg(LOGO_MAIN, false), loadImg(me.stance_left_url || me.stance_right_url || me.headshot_url)]);
-  const draw = (withPhoto) => {
-    const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
-    const x = c.getContext('2d');
-    x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
-    const g = x.createRadialGradient(W / 2, 1050, 40, W / 2, 1050, 700); g.addColorStop(0, 'rgba(212,175,55,.38)'); g.addColorStop(1, 'rgba(212,175,55,0)');
-    x.fillStyle = g; x.fillRect(0, 0, W, H);
-    x.textAlign = 'center';
-    if (withPhoto) {
-      const h = 700, w = withPhoto.width * (h / withPhoto.height);
-      x.save(); if (!me.stance_left_url && me.stance_right_url) { x.translate(W, 0); x.scale(-1, 1); }
-      x.drawImage(withPhoto, (W - w) / 2, 1055 - h, w, h); x.restore();
-    } else { x.font = '800 260px Archivo, Arial Narrow, sans-serif'; x.fillStyle = '#d4af37'; x.fillText(initials(me.name), W / 2, 800); }
-    if (word) { const w = 370, h = word.height * w / word.width; x.drawImage(word, (W - w) / 2, 34, w, h); }
-    const fade = x.createLinearGradient(0, 900, 0, 1100); fade.addColorStop(0, 'rgba(0,0,0,0)'); fade.addColorStop(1, 'rgba(0,0,0,1)');
-    x.fillStyle = fade; x.fillRect(0, 900, W, 450);
-    x.fillStyle = '#d4af37'; x.font = '800 36px Archivo, Arial Narrow, sans-serif'; x.fillText(`WEEK ${ev.week_no}  ·  MY PICK TO WIN`, W / 2, 1090);
-    x.fillStyle = '#fff'; x.font = '800 128px Archivo, Arial Narrow, sans-serif'; x.fillText(lastName(me).toUpperCase(), W / 2, 1210, W - 80);
-    x.fillStyle = '#bdbbb4'; x.font = '600 34px Archivo, sans-serif'; x.fillText(opp ? `vs ${opp.name}` : '', W / 2, 1265);
-    x.fillStyle = '#d4af37'; x.font = '700 32px Archivo, sans-serif'; x.fillText(`@${S.me.profile.username}  ·  ${plural(e.wins, 'win')}`, W / 2, 1314);
-    return c;
-  };
-  let c = draw(photo);
-  try { c.toDataURL(); } catch (err) { c = draw(null); }
-  const url = c.toDataURL('image/png');
-  openDialog(`<h3 class="c">Share your pick</h3><p class="sub">Press and hold the image to save it, then post it to your story.</p><div class="sharewrap"><img src="${url}" alt="Your MMA Survivor pick"></div>${FORCE_DEMO ? '' : `<p style="margin:14px 0 0"><a class="btn btn-dark" style="width:100%" href="${url}" download="hof-survivor-pick.png">Download image</a></p>`}`);
+  const p = ev && pickFor(ev.id); if (!p || !S.me?.profile) return;
+  openDialog(`<h3 class="c">Share your pick</h3><p class="sub">Post it to your story and bring your friends in.</p>
+    <div class="tabs2" id="shfmt">${[['story', 'Story'], ['post', 'Post']].map(([k, l]) => `<button data-act="sharefmt" data-f="${k}" aria-pressed="${SHARE.fmt === k}">${l}</button>`).join('')}</div>
+    <div class="sharewrap" id="shimg"><p style="color:#bbb;padding:40px 10px;margin:0">Making your graphic…</p></div><div class="share-acts" id="shacts"></div>`);
+  const me = p.fighter || {};
+  const src = [me.stance_left_url, me.stance_right_url, me.headshot_url].filter(Boolean);
+  const [, logo, word, avatar] = await Promise.all([loadShareFonts(), loadImg(LOGO_MAIN, false), loadImg(LOGO_WORDMARK, false), exportableImg(S.me.profile.avatar_url)]);
+  let photo = null, fig = null, flip = false;
+  for (const u of src) { const im = await exportableImg(u); const t = im && trimAlpha(im); if (t) { photo = t; fig = headOf(t); flip = u === me.stance_right_url; break; } }
+  const so = S.socials || {};
+  const handles = so.is_public === false ? '' : [so.instagram && `IG @${so.instagram}`, so.x_handle && `X @${so.x_handle}`].filter(Boolean).join('    ');
+  SHARE.data = { week: ev.week_no, name: me.name || '', last: lastName(me), streak: e?.status === 'alive' ? e.wins : 0, user: S.me.profile.username, handles, logo, word, avatar, photo, fig, flip };
+  renderShare();
 }
+function renderShare() {
+  if (!SHARE.data || !$('#shimg')) return;
+  SHARE.url = drawShare(SHARE.fmt, SHARE.data).toDataURL('image/png');
+  $('#shimg').innerHTML = `<img src="${SHARE.url}" alt="Your MMA Survivor pick">`;
+  document.querySelectorAll('#shfmt button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.f === SHARE.fmt)));
+  $('#shacts').innerHTML = (canShareFiles() ? `<button class="btn btn-dark" data-act="sharego">${I.share} Share</button>` : '')
+    + (FORCE_DEMO ? '' : `<button class="btn ${canShareFiles() ? 'btn-ghost' : 'btn-dark'}" data-act="sharedl">Download</button>`)
+    + (TOUCH ? '' : '');
+  if (TOUCH && !canShareFiles()) $('#shacts').insertAdjacentHTML('afterend', '<p class="note" style="text-align:center">Or press and hold the image to save it.</p>');
+}
+const shareName = () => `mma-survivor-week${SHARE.data?.week || ''}-${SHARE.fmt}.png`;
 
 /* =====================================================================
    ACTIONS
@@ -1593,8 +1845,12 @@ async function act(el) {
       await api.resetPassword(email); toast('Check your email for a reset link');
     }
     else if (a === 'rmphoto') { S.photo = null; $('#pf-photo').innerHTML = photoPickerHTML(); }
-    else if (a === 'join') await joinSeason();
-    else if (a === 'gopick') { S.tab = 'pick'; S.viewEventId = S.openEvent?.id; S.fightsFor = null; render(); await loadFights(); render(); window.scrollTo({ top: 0 }); }
+    else if (a === 'join' || a === 'gopick') {
+      S.tab = 'pick'; store.set('hof-survivor-tab', 'pick'); S.viewEventId = S.openEvent?.id; S.fightsFor = null; render(); await loadFights(); render();
+      requestAnimationFrame(() => { const t = $('#card-top'); if (t) t.scrollIntoView({ block: 'start' }); else window.scrollTo({ top: 0 }); });
+    }
+    else if (a === 'scrollcard') { const t = $('#card-top'); if (t) t.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }
+    else if (a === 'phone') { if (!S.me?.profile) return profileDialog(); phoneDialog(false); }
     else if (a === 'week') {
       const weeks = S.events.filter((e) => e.week_no != null);
       const i = weeks.findIndex((e) => e.id === S.viewEventId);
@@ -1606,7 +1862,6 @@ async function act(el) {
     else if (a === 'pick') {
       if (!S.me) return authDialog('up');
       if (!S.me.profile) return profileDialog();
-      if (!S.entry) { await joinSeason({ quiet: true }); if (!S.entry) return; }
       const ctx = pickCtx();
       if (!ctx.canPick) return;
       const { fight: fightId, fighter: fighterId } = el.dataset;
@@ -1616,15 +1871,31 @@ async function act(el) {
     else if (a === 'cancelpick') { S.draft = null; render(); }
     else if (a === 'savepick') {
       const d = S.draft; if (!d || d.saving) return;
+      // a 3-win streak needs a phone number before the next pick
+      if (S.entry?.status === 'alive' && S.entry.wins >= 3 && !S.phone) return phoneDialog(true);
       d.saving = true; renderSheet();
       try {
-        await api.makePick(S.entry.id, d.fightId, d.fighterId);
+        const fresh = !S.entry || S.entry.status !== 'alive';
+        const entry = fresh ? await api.join() : S.entry;   // lost or new: this pick starts a new streak
+        await api.makePick(entry.id, d.fightId, d.fighterId);
         const f = fighterIn(d.fightId, d.fighterId);
         S.draft = null; await loadMe(); render();
-        toast(`Pick saved: ${f?.name}`);
-      } catch (err) { d.saving = false; renderSheet(); throw err; }
+        toast(fresh && S.entries.length > 1 ? `New streak started: ${f?.name}` : `Pick saved: ${f?.name}`);
+      } catch (err) {
+        d.saving = false; renderSheet();
+        if (/phone number/i.test(err.message || '')) { S.phone = null; return phoneDialog(true); }
+        throw err;
+      }
     }
     else if (a === 'share') await shareCard();
+    else if (a === 'sharefmt') { SHARE.fmt = el.dataset.f; store.set('hof-survivor-sharefmt', SHARE.fmt); renderShare(); }
+    else if (a === 'sharedl') { const l = document.createElement('a'); l.href = SHARE.url; l.download = shareName(); document.body.appendChild(l); l.click(); l.remove(); }
+    else if (a === 'sharego') {
+      try {
+        const blob = await (await fetch(SHARE.url)).blob();
+        await navigator.share({ files: [new File([blob], shareName(), { type: 'image/png' })], text: 'My MMA Survivor pick this week. Play free: https://www.homeoffight.com/survivor' });
+      } catch (err) { if (err?.name !== 'AbortError') toast("Couldn't open sharing. Use Download instead.", true); }
+    }
     else if (a === 'lbfilter') { S.lb.filter = el.dataset.f; await loadBoard(); render(); }
     else if (a === 'lbmore') { await loadBoard(true); render(); }
     else if (a === 'simulate') { api.simulate(); S.draft = null; S.viewEventId = null; await refresh({ season: true }); toast('Fight night simulated with random, odds-weighted results'); }
@@ -1676,16 +1947,32 @@ document.addEventListener('submit', async (e) => {
         const prev = S.socials || {};
         if (ig !== (prev.instagram || '') || x !== (prev.x_handle || '') || pub !== (prev.is_public !== false)) socials = { ig: ig || null, x: x || null, pub };
       }
+      let phone = null;
+      if ($('#pf-phone')) {
+        const raw = $('#pf-phone').value.trim();
+        if (raw) { phone = cleanPhone(raw); if (!phone) throw new Error('That phone number does not look right. Include your country code'); if (phone === S.phone) phone = null; }
+      }
       await api.saveProfile($('#pf-name').value.trim());
       if (!had) S.me.profile = { username: $('#pf-name').value.trim() };
       if (S.photo) await api.uploadAvatar(S.photo);
       else if (S.photo === null && had) await api.removeAvatar();
       if (socials) await api.saveSocials(socials.ig, socials.x, socials.pub);
+      if (phone) S.phone = await api.setPhone(phone);
       S.photo = undefined;
       closeDialog(); await refresh();
-      if (!S.entry && S.season && S.season.status !== 'complete') { try { await joinSeason(); } catch (err) { toast(err.message, true); } }
+      if (!had) { S.tab = 'pick'; render(); toast("You're in. Tap a fighter to make your pick."); }
       else toast('Profile saved');
     } else if (f.id === 'pwform') { await api.setPassword($('#pw-new').value); closeDialog(); toast('Password updated'); }
+    else if (f.id === 'phoneform') {
+      $('#ph-err').textContent = '';
+      const v = cleanPhone($('#ph-num').value);
+      if (!v) throw new Error('That phone number does not look right. Include your country code');
+      S.phone = await api.setPhone(v);
+      const resume = f.dataset.resume === '1';
+      closeDialog(); toast('Phone number saved');
+      if (resume && S.draft) await act({ dataset: { act: 'savepick' } });
+      else render();
+    }
   } catch (err) {
     const box = f.querySelector('.err'); if (box) box.textContent = err.message; else toast(err.message, true);
   } finally { if (btn && document.body.contains(btn)) btn.disabled = false; }
@@ -1715,6 +2002,7 @@ function loadScript(src) { return new Promise((res, rej) => { const s = document
   $('#brandlogo').src = LOGO_MAIN;
   $('#hofmark').src = LOGO_WORDMARK;
   render();
+  setTimeout(loadShareFonts, 1500);
   try {
     if (DEMO) api = DemoAPI();
     else {
