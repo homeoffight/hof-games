@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<title>Home of Fight — Build the Perfect MMA Fighter</title>
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="images/hof-badge.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<!-- PLAYWIRE: if this game is served inside an <iframe>, the Playwire/Ramp loader script must be placed HERE
+     (inside the game page) — a script on the parent WordPress page cannot reach #hof-ad-game-bottom. -->
+<style>
+  :root{
+    --black:#000000; --ink:#08080A; --panel:#101011; --panel2:#17171A;
+    --line:#2A2620; --line-gold:#4A3C17;
+    --gold:#E0B54B; --gold-lite:#F7E5A8; --gold-deep:#A87826;
+    --gold-grad:linear-gradient(180deg,#FDF3C8 0%,#E8C56A 18%,#C9992F 48%,#A87826 62%,#E3BC5E 85%,#F7E5A8 100%);
+    --bone:#F6F3EC; --steel:#8A8F98; --green:#3FCB7A; --red:#D6362C;
+    --oct:polygon(29.3% 0%,70.7% 0%,100% 29.3%,100% 70.7%,70.7% 100%,29.3% 100%,0% 70.7%,0% 29.3%);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--black);}
+  body{
+    color:var(--bone);font-family:'Inter',system-ui,sans-serif;min-height:100dvh;
+    display:flex;justify-content:center;
+    background:
+      radial-gradient(120% 70% at 50% -8%, rgba(224,181,75,.16), transparent 62%),
+      radial-gradient(90% 50% at 50% 108%, rgba(224,181,75,.07), transparent 60%),
+      var(--black);
+    background-attachment:fixed;
+  }
+  .app{width:100%;max-width:480px;min-height:100dvh;display:flex;flex-direction:column;
+    padding:0 14px calc(14px + env(safe-area-inset-bottom)); position:relative;}
+  .display{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;line-height:.94;}
+  .tabnum{font-variant-numeric:tabular-nums;}
+  .goldtext{background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .screen{display:none;flex-direction:column;flex:1;animation:fade .3s ease;}
+  .screen.active{display:flex;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .spacer{flex:1;min-height:6px;}
+
+  /* ---------- START ---------- */
+  #screen-start{justify-content:space-between;padding-top:1.2vh;}
+  .starttop{display:flex;flex-direction:column;}
+  .badge{display:block;margin:0 auto;width:clamp(82px,14.5vh,150px);aspect-ratio:1;height:auto;
+    filter:drop-shadow(0 6px 22px rgba(224,181,75,.30));}
+  .rule-line{height:1px;margin:clamp(12px,2.2vh,26px) 0 0;background:linear-gradient(90deg,transparent,var(--gold-deep),var(--gold),var(--gold-deep),transparent);opacity:.75;}
+  .kicker{color:var(--gold);font-weight:800;font-size:clamp(9px,1.25vh,12px);letter-spacing:.18em;text-transform:uppercase;text-align:center;margin-top:clamp(12px,2vh,24px);white-space:nowrap;}
+  .title{font-size:clamp(34px,min(12vw,7vh),64px);text-align:center;margin:clamp(8px,1.4vh,16px) 0 0;}
+  .subtitle{color:#9BA0A8;text-align:center;font-size:clamp(12.5px,1.85vh,17px);line-height:1.55;margin:clamp(10px,1.8vh,20px) auto 0;max-width:380px;}
+  .subtitle b{color:var(--gold);font-weight:700;}
+  .rules{background:linear-gradient(170deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:15px;padding:clamp(14px,2.2vh,22px) clamp(15px,2.4vw,20px) clamp(3px,.6vh,8px);margin-top:0;position:relative;overflow:hidden;}
+  .rules::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold-grad);}
+  .rules h3{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(14px,2vh,19px);letter-spacing:.06em;margin:0 0 clamp(10px,1.6vh,16px);color:var(--gold);text-align:center;}
+
+  /* division toggle */
+  .divisions{display:flex;gap:10px;margin-top:14px;}
+  .divbtn{flex:1;cursor:pointer;font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.05em;
+    font-size:17px;padding:13px;border-radius:12px;background:transparent;transition:.15s;
+    border:2px solid var(--line);color:var(--steel);}
+  .divbtn:active{transform:scale(.98);}
+  .divbtn.male.active{background:linear-gradient(180deg,#3B82F6,#1D4ED8);border-color:#5B9BFF;color:#fff;
+    box-shadow:0 6px 20px rgba(59,130,246,.35),inset 0 1px 0 rgba(255,255,255,.35);}
+  .divbtn.female.active{background:linear-gradient(180deg,#F65B9B,#D6316F);border-color:#FF8FBE;color:#fff;
+    box-shadow:0 6px 20px rgba(246,91,155,.35),inset 0 1px 0 rgba(255,255,255,.35);}
+  .divbtn.male:not(.active):hover{border-color:#3B82F6;color:#7FB0FF;}
+  .divbtn.female:not(.active):hover{border-color:#F65B9B;color:#FF9EC6;}
+  .rule{display:flex;gap:12px;align-items:flex-start;margin-bottom:clamp(10px,1.8vh,18px);}
+  .rule .n{font-family:'Anton',sans-serif;font-size:clamp(16px,2.1vh,20px);line-height:1.15;min-width:18px;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .rule p{margin:0;font-size:clamp(12.5px,1.75vh,16px);color:#BFC2C8;line-height:1.5;}
+  .rule b{color:var(--bone);}
+  .rule.bonus p{color:#E8D9A8;}
+  .rule.bonus b{color:var(--gold);}
+
+  /* ---------- Buttons ---------- */
+  .btn{width:100%;border:none;cursor:pointer;font-family:'Anton',sans-serif;text-transform:uppercase;
+    letter-spacing:.05em;font-size:19px;padding:16px;border-radius:13px;margin-top:14px;
+    background:var(--gold-grad);color:#161006;transition:transform .08s,filter .2s;
+    box-shadow:0 10px 30px rgba(224,181,75,.24),inset 0 1px 0 rgba(255,255,255,.5);}
+  .btn:active{transform:scale(.985);}
+  .btn:hover{filter:brightness(1.06);}
+  .btn.ghost{background:transparent;color:var(--bone);border:1px solid var(--line-gold);box-shadow:none;}
+  .btn.ghost:hover{border-color:var(--gold);color:var(--gold);filter:none;}
+  .btn.sm{font-size:16px;padding:13px;margin-top:10px;}
+
+  /* ---------- Brand bar / HUD ---------- */
+  .brandbar{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 0 8px;}
+  .brandbar img.b{width:22px;height:22px;}
+  .brandbar img.w{height:11px;width:auto;opacity:.95;}
+  .hud{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;}
+  .hud .lab{font-size:10px;color:var(--steel);letter-spacing:.18em;text-transform:uppercase;font-weight:800;}
+  .hud .lab b{color:var(--gold);font-size:13px;}
+  .hud .lab span{color:#3E4148;}
+  .pips{display:flex;gap:4px;margin-bottom:11px;}
+  .pip{height:3px;flex:1;border-radius:2px;background:#232323;transition:background .3s;}
+  .pip.done{background:var(--gold-grad);}
+  .pip.now{background:var(--gold);box-shadow:0 0 9px rgba(224,181,75,.6);}
+
+  /* ---------- Octagon ---------- */
+  .octa{position:relative;flex:none;}
+  .octa .ring{position:absolute;inset:0;background:var(--gold-grad);clip-path:var(--oct);}
+  .octa .fill{position:absolute;background:radial-gradient(circle at 50% 32%,#1B1B1E,#000);clip-path:var(--oct);overflow:hidden;}
+  .octa img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;}
+  .octa .fallback{position:absolute;inset:0;align-items:center;justify-content:center;font-family:'Anton',sans-serif;color:#43454A;}
+  .octa.big{width:clamp(104px,30vw,132px);aspect-ratio:1;}
+  .octa.big .fill{inset:4px;}
+  .octa.big .fallback{font-size:38px;}
+  .octa.sm{width:52px;height:52px;}
+  .octa.sm .fill{inset:2px;}
+  .octa.sm .fallback{font-size:17px;}
+
+  /* ---------- Fighter card (compact) ---------- */
+  .fighter{background:linear-gradient(150deg,#1A1A1D,var(--panel));border:1px solid var(--line);border-radius:16px;
+    padding:13px;position:relative;overflow:hidden;animation:slidein .35s cubic-bezier(.2,.8,.2,1);
+    box-shadow:0 12px 34px rgba(0,0,0,.6);}
+  @keyframes slidein{from{opacity:0;transform:translateX(18px);}to{opacity:1;transform:none;}}
+  .fighter::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold-grad);}
+  .fighterinner{display:flex;align-items:center;gap:13px;}
+  .fmeta{min-width:0;flex:1;display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
+  .onclock{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:800;}
+  .primetag{display:none;margin-left:7px;padding:1px 7px 2px;border-radius:20px;font-size:8.5px;letter-spacing:.14em;
+    font-weight:900;color:#161006;background:var(--gold-grad);vertical-align:middle;
+    box-shadow:0 1px 4px rgba(224,181,75,.4);}
+  .primetag.on{display:inline-block;}
+  .rprime{display:inline-block;margin-left:6px;padding:0 5px 1px;border-radius:14px;font-size:8px;letter-spacing:.1em;
+    font-weight:900;color:#161006;background:var(--gold-grad);vertical-align:middle;}
+  .fname{font-family:'Anton',sans-serif;font-size:clamp(21px,6.4vw,30px);text-transform:uppercase;line-height:1;color:var(--bone);}
+
+  /* respin now lives inside the card */
+  .respin{display:inline-flex;align-items:center;gap:7px;cursor:pointer;padding:7px 12px;border-radius:9px;
+    background:rgba(224,181,75,.10);border:1px solid var(--line-gold);color:var(--gold);
+    font-family:'Inter';font-weight:800;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;transition:.15s;}
+  .respin:hover{background:rgba(224,181,75,.2);border-color:var(--gold);}
+  .respin:active{transform:scale(.96);}
+  .respin .ico{font-size:13px;line-height:1;}
+  .respin:disabled{opacity:.34;cursor:not-allowed;color:var(--steel);border-color:var(--line);background:transparent;}
+  .respin:disabled:hover{background:transparent;border-color:var(--line);}
+  .actionrow{display:flex;gap:8px;flex-wrap:nowrap;margin-top:12px;}
+  .actionrow .respin{flex:1;justify-content:center;}
+  /* coach button — green accent to distinguish from gold respin */
+  .respin.coach{background:rgba(63,203,122,.12);border-color:#2f7a4e;color:var(--green);}
+  .respin.coach:hover{background:rgba(63,203,122,.22);border-color:var(--green);}
+  .respin.coach:disabled{opacity:.34;color:var(--steel);border-color:var(--line);background:transparent;}
+  .respin.coach.applied{background:rgba(63,203,122,.16);border-color:var(--green);color:var(--green);opacity:1;cursor:default;}
+
+  /* coach picker — 3 cards under the fighter card */
+  .coachpick{display:none;flex-direction:column;gap:7px;margin:12px 0 4px;}
+  .coachpick.show{display:flex;animation:fade .25s ease;}
+  .coachpick .cptitle{text-align:center;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:800;color:var(--green);margin-bottom:2px;}
+  .coachcard{display:flex;align-items:center;gap:11px;cursor:pointer;
+    background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 13px 9px 9px;transition:.14s;}
+  .coachcard:hover{border-color:var(--green);background:var(--panel2);}
+  .coachcard:active{transform:scale(.985);}
+  .cpic{width:42px;height:42px;border-radius:8px;overflow:hidden;flex:none;background:#0e0e12;border:1px solid var(--line);}
+  .cpic img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;}
+  .cpic .cpicfb{width:100%;height:100%;align-items:center;justify-content:center;font-family:'Anton',sans-serif;font-size:15px;color:#4b4f57;}
+  .coachcard .cn{font-size:13.5px;font-weight:700;color:var(--bone);}
+  .coachcard .cb{font-size:10.5px;color:var(--green);font-weight:700;text-align:right;line-height:1.35;margin-left:auto;}
+  .coachcard .cb.debuff{color:var(--red);}
+
+  .prompt{text-align:center;font-size:11.5px;color:var(--steel);margin:11px 0 9px;letter-spacing:.04em;text-transform:uppercase;font-weight:700;}
+  .prompt b{color:var(--gold);}
+
+  /* ---------- Slots: 2-column grid ---------- */
+  .slots{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+  .slot{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 11px;transition:.14s;min-height:52px;
+    display:flex;flex-direction:column;justify-content:center;gap:3px;}
+  .slot .cat{font-size:12.5px;font-weight:700;line-height:1.1;}
+  .slot .state{font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:800;
+    background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .slot.open{cursor:pointer;}
+  .slot.open:hover{border-color:var(--gold);background:var(--panel2);}
+  .slot.open:active{transform:scale(.98);}
+  .slot.locked{opacity:.62;}
+  .slot.locked .cat{color:var(--steel);}
+  .slot.locked .state{background:none;-webkit-text-fill-color:var(--bone);color:var(--bone);font-weight:600;
+    text-transform:none;letter-spacing:0;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .slot.locked .cat::after{content:" \2713";color:var(--green);}
+
+  /* ---------- Results ---------- */
+  .resulttop{text-align:center;}
+  .tier{font-family:'Anton',sans-serif;font-size:clamp(30px,9vw,44px);text-transform:uppercase;line-height:.95;margin:5px 0 8px;
+    background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 3px 14px rgba(224,181,75,.3));}
+  .scorebig{font-family:'Anton',sans-serif;font-size:clamp(52px,15vw,66px);line-height:.86;color:var(--bone);}
+  .scorebig .max{font-size:.32em;color:#54585F;}
+  .scoreovr{color:var(--steel);font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:800;margin-top:7px;}
+  .scoreovr b{color:var(--gold);font-size:14px;}
+  .rcard{background:linear-gradient(170deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:15px;padding:4px 12px;margin-top:14px;position:relative;overflow:hidden;}
+  .rcard::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold-grad);}
+  .rrow{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:7px 0;border-bottom:1px solid var(--line);}
+  .rrow:last-child{border-bottom:none;}
+  .rl{display:flex;align-items:center;gap:10px;min-width:0;}
+  .rtext{display:flex;flex-direction:column;gap:1px;min-width:0;}
+  .rcat{font-size:9px;color:var(--gold);text-transform:uppercase;letter-spacing:.16em;font-weight:800;}
+  .rfighter{font-size:13.5px;font-weight:700;color:var(--bone);}
+  .rval{font-family:'Anton',sans-serif;font-size:23px;}
+  .rvalwrap{display:flex;align-items:baseline;gap:6px;justify-content:flex-end;}
+  .rboost{font-family:'Inter';font-weight:800;font-size:11px;color:var(--green);letter-spacing:.02em;opacity:.9;}
+  .rboost.down{color:var(--red);}
+
+  /* ---------- Bonus panels ---------- */
+  .bonusbox{margin-top:14px;border-radius:15px;padding:15px 16px;text-align:center;position:relative;overflow:hidden;}
+  .bonusbox.win{background:linear-gradient(165deg,#2C2413,#161206);border:1px solid var(--gold);
+    box-shadow:0 0 34px rgba(224,181,75,.22);}
+  .bonusbox.win::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold-grad);}
+  .bonusbox.lose{background:var(--panel);border:1px dashed var(--line);}
+  .bonusbox .bhead{font-family:'Anton',sans-serif;text-transform:uppercase;font-size:19px;line-height:1.05;margin-bottom:7px;}
+  .bonusbox.win .bhead{background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .bonusbox.lose .bhead{color:var(--steel);}
+  .bonusbox p{margin:0;font-size:12.5px;line-height:1.5;color:#C3C6CC;}
+  .bonusbox.win p{color:#E6DCC0;}
+  .bonusbox .req{display:inline-block;margin-top:9px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--steel);}
+
+  /* ---------- Bonus screen ---------- */
+  .promo{width:100%;border-radius:15px;display:block;border:1px solid var(--line-gold);margin-top:12px;}
+  .offer{text-align:center;margin-top:16px;}
+  .offer .big{font-family:'Anton',sans-serif;font-size:clamp(30px,9vw,42px);text-transform:uppercase;line-height:1;
+    background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .offer p{color:#B9BCC2;font-size:13px;line-height:1.55;margin:11px auto 0;max-width:350px;}
+  .fineprint{color:#5B5F66;font-size:10.5px;line-height:1.5;text-align:center;margin-top:12px;}
+
+  .foot{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:16px;opacity:.5;}
+  .foot img{width:18px;height:18px;}
+  .foot span{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--steel);font-weight:800;}
+
+  /* ---------- Ad slot (Playwire) ---------- */
+  .ad-slot{width:100%;max-width:336px;min-height:250px;margin:22px auto 10px;
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;}
+  .ad-slot::before{content:'Advertisement';font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--steel);opacity:.4;font-weight:800;}
+  #screen-start .btn{font-size:clamp(18px,2.7vh,26px);padding:clamp(15px,2.2vh,21px);margin-top:clamp(12px,2vh,20px);}
+  /* ---------- Discord pop-up ---------- */
+  .modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;
+    padding:calc(18px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));
+    background:rgba(0,0,0,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+  .modal.show{display:flex;animation:fade .25s ease;}
+  .modal-card{position:relative;width:100%;max-width:400px;max-height:100%;display:flex;flex-direction:column;
+    animation:pop .32s cubic-bezier(.2,.9,.3,1.2);}
+  @keyframes pop{from{opacity:0;transform:scale(.92) translateY(12px);}to{opacity:1;transform:none;}}
+  .modal-banner{width:100%;min-height:0;object-fit:contain;border-radius:16px;display:block;
+    border:1px solid var(--line-gold);box-shadow:0 20px 60px rgba(0,0,0,.7);}
+  .modal-x{position:absolute;top:-13px;right:-13px;width:38px;height:38px;border-radius:50%;cursor:pointer;
+    background:var(--black);border:2px solid var(--gold);color:var(--gold);font-size:16px;font-weight:700;line-height:1;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.6);transition:.15s;z-index:2;}
+  .modal-x:hover{background:var(--gold);color:var(--black);}
+  .modal-x:active{transform:scale(.92);}
+  .modal-cta{margin-top:12px;text-decoration:none;text-align:center;display:block;line-height:1.2;flex:none;}
+
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--gold-grad);color:#161006;font-weight:800;font-size:13px;padding:11px 22px;border-radius:30px;opacity:0;pointer-events:none;transition:.25s;z-index:50;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ START ============ -->
+  <section class="screen active" id="screen-start">
+    <div class="starttop">
+      <img class="badge" src="images/hof-badge.png" alt="Home of Fight">
+      <div class="rule-line"></div>
+      <div class="kicker">MMA Game created by Home of Fight</div>
+      <h1 class="title display">Build The<br><span class="goldtext">Perfect Fighter</span></h1>
+    <p class="subtitle">Build a fighter rated <b>93 overall or higher</b> and you unlock a special bonus every MMA fan can claim.</p>
+    </div>
+
+    <div class="rules">
+      <h3>How it works</h3>
+      <div class="rule"><span class="n">1</span><p>Each round a <b>random fighter</b> steps up — ratings hidden.</p></div>
+      <div class="rule"><span class="n">2</span><p>You get <b>one respin</b> per game.</p></div>
+      <div class="rule bonus"><span class="n">3</span><p>Hit <b>93 overall</b> across all eight skills to <b>unlock the bonus</b>.</p></div>
+    </div>
+
+    <div class="divisions" id="divisions">
+      <button class="divbtn male active" data-div="male">Male</button>
+      <button class="divbtn female" data-div="female">Female</button>
+    </div>
+
+    <button class="btn" id="btn-start">Start the Draft</button>
+  </section>
+
+  <!-- ============ GAME ============ -->
+  <section class="screen" id="screen-game">
+    <div class="hud">
+      <div class="lab">Round <b id="roundNow">1</b> <span>/ 8</span></div>
+      <div class="lab">Locked <b id="lockedCount">0</b> <span>/ 8</span></div>
+    </div>
+    <div class="pips" id="pips"></div>
+
+    <div class="fighter" id="fighterCard">
+      <div class="fighterinner">
+        <div id="photoSlot"></div>
+        <div class="fmeta">
+          <div class="onclock">On the clock · ratings hidden<span class="primetag" id="primeTag">Prime</span></div>
+          <div class="fname" id="fName">—</div>
+        </div>
+      </div>
+      <div class="actionrow">
+        <button class="respin" id="btn-respin">
+          <span class="ico">&#8635;</span><span class="rtext">Respin · 1 left</span>
+        </button>
+        <button class="respin coach" id="btn-coach">
+          <span class="ico">&#9733;</span><span class="ctext">Coach · 1 left</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="coachpick" id="coachPick"></div>
+
+    <p class="prompt">Tap a skill to lock <b id="fNameInline">him</b> in</p>
+    <div class="slots" id="slots"></div>
+    <div class="foot" style="margin-top:18px"><img src="images/hof-badge.png" alt=""><span>Home of Fight</span></div>
+
+    <!-- PLAYWIRE AD SLOT — empty container for Playwire to target and inject into.
+         Selector: #hof-ad-game-bottom  (also .ad-slot / [data-ad="game-bottom"])
+         Reserved 336x250 (fits 300x250 MREC, 320x100, 320x50). Adjust .ad-slot min-height in CSS if needed. -->
+    <div class="ad-slot" id="hof-ad-game-bottom" data-ad="game-bottom" aria-label="Advertisement"></div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section class="screen" id="screen-result">
+    <div class="brandbar">
+      <img class="b" src="images/hof-badge.png" alt="">
+      <img class="w" src="images/hof-wordmark.png" alt="Home of Fight">
+    </div>
+    <div class="resulttop">
+      <div class="kicker" style="margin-top:2px">Your Perfect Fighter Is A</div>
+      <div class="tier" id="tierName">—</div>
+      <div class="scorebig tabnum"><span id="scoreVal">0</span><span class="max"> / 800</span></div>
+      <div class="scoreovr">Overall <b id="ovrVal">0</b></div>
+    </div>
+    <div class="rcard" id="resultCard"></div>
+    <div id="bonusSlot"></div>
+    <button class="btn ghost sm" id="btn-share">Share My Result</button>
+    <button class="btn ghost sm" id="btn-again">Draft Again</button>
+    <button class="btn ghost sm" id="btn-home">Home</button>
+    <div class="foot"><img src="images/hof-badge.png" alt=""><span>Home of Fight</span></div>
+  </section>
+
+  <!-- ============ BONUS ============ -->
+  <section class="screen" id="screen-bonus">
+    <div class="brandbar">
+      <img class="b" src="images/hof-badge.png" alt="">
+      <img class="w" src="images/hof-wordmark.png" alt="Home of Fight">
+    </div>
+    <div class="kicker">Bonus Unlocked</div>
+    <img class="promo" id="bonusBanner" src="images/polymarket-banner.jpg" alt="Bonus offer">
+    <div class="offer">
+      <div class="big" id="bonusBig">$50 in Free Bets</div>
+      <p id="bonusBody">Sign up and claim your bonus through Home of Fight.</p>
+    </div>
+    <a class="btn" style="display:block;text-align:center;text-decoration:none;line-height:1.2"
+       id="btn-claim" href="#" target="_blank" rel="noopener">Claim My Bonus</a>
+    <button class="btn ghost sm" id="btn-back">Back to My Fighter</button>
+    <p class="fineprint" id="bonusFine">18+ where legally permitted. Terms and eligibility apply. Please gamble responsibly.</p>
+    <div class="spacer"></div>
+    <div class="foot"><img src="images/hof-badge.png" alt=""><span>Home of Fight</span></div>
+  </section>
+
+  <!-- ============ DISCORD POP-UP ============ -->
+  <div class="modal" id="discordModal">
+    <div class="modal-card">
+      <button class="modal-x" id="btn-modal-close" aria-label="Close">&#10005;</button>
+      <img class="modal-banner" id="modalBanner" src="images/whatnot-banner.jpg" alt="Bonus unlocked">
+      <a class="btn modal-cta" id="btn-discord"
+         href="#" target="_blank" rel="noopener">Claim Bonus</a>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copied to clipboard</div>
+</div>
+
+<script>
+const FIGHTERS = [
+  {name:"Jon Jones",prime:true, s:{striking:97,power:92,wrestling:100,jiujitsu:96,cardio:99,fightiq:100,chin:100,speed:91}},
+  {name:"Demetrious Johnson",prime:true, s:{striking:99,power:83,wrestling:95,jiujitsu:96,cardio:98,fightiq:100,chin:93,speed:100}},
+  {name:"Fedor",prime:true, s:{striking:90,power:92,wrestling:95,jiujitsu:94,cardio:95,fightiq:94,chin:94,speed:100}},
+  {name:"Georges St Pierre",prime:true, s:{striking:94,power:83,wrestling:100,jiujitsu:96,cardio:95,fightiq:100,chin:90,speed:92}},
+  {name:"Khabib",prime:true, s:{striking:75,power:82,wrestling:100,jiujitsu:100,cardio:100,fightiq:97,chin:96,speed:93}},
+  {name:"Alex Volkanovski", s:{striking:100,power:86,wrestling:91,jiujitsu:86,cardio:99,fightiq:99,chin:88,speed:91}},
+  {name:"Islam Makhachev", s:{striking:90,power:84,wrestling:100,jiujitsu:100,cardio:91,fightiq:96,chin:88,speed:90}},
+  {name:"Alexandre Pantoja", s:{striking:90,power:87,wrestling:92,jiujitsu:96,cardio:93,fightiq:90,chin:100,speed:90}},
+  {name:"Tom Aspinall", s:{striking:92,power:99,wrestling:91,jiujitsu:92,cardio:86,fightiq:89,chin:89,speed:100}},
+  {name:"Jose Aldo",prime:true, s:{striking:98,power:90,wrestling:89,jiujitsu:88,cardio:90,fightiq:90,chin:94,speed:99}},
+  {name:"Cain Velasquez",prime:true, s:{striking:92,power:92,wrestling:95,jiujitsu:85,cardio:94,fightiq:92,chin:92,speed:93}},
+  {name:"Ilia Topuria", s:{striking:95,power:98,wrestling:90,jiujitsu:90,cardio:89,fightiq:90,chin:90,speed:93}},
+  {name:"BJ Penn",prime:true, s:{striking:92,power:85,wrestling:92,jiujitsu:98,cardio:90,fightiq:93,chin:95,speed:90}},
+  {name:"Arman Tsarukyan", s:{striking:89,power:92,wrestling:98,jiujitsu:92,cardio:97,fightiq:89,chin:88,speed:90}},
+  {name:"Petr Yan", s:{striking:98,power:80,wrestling:93,jiujitsu:90,cardio:92,fightiq:95,chin:95,speed:90}},
+  {name:"Razhabali Shaidulloev", s:{striking:90,power:92,wrestling:92,jiujitsu:91,cardio:93,fightiq:90,chin:93,speed:92}},
+  {name:"Chuck Liddell",prime:true, s:{striking:95,power:96,wrestling:90,jiujitsu:80,cardio:92,fightiq:92,chin:97,speed:90}},
+  {name:"Daniel Cormier",prime:true, s:{striking:84,power:90,wrestling:100,jiujitsu:90,cardio:92,fightiq:92,chin:94,speed:90}},
+  {name:"Kamaru Usman",prime:true, s:{striking:89,power:92,wrestling:98,jiujitsu:80,cardio:96,fightiq:95,chin:94,speed:88}},
+  {name:"Diego Lopes", s:{striking:90,power:91,wrestling:89,jiujitsu:95,cardio:90,fightiq:82,chin:97,speed:95}},
+  {name:"Tony Ferguson",prime:true, s:{striking:88,power:89,wrestling:84,jiujitsu:92,cardio:98,fightiq:89,chin:99,speed:89}},
+  {name:"Joshua Van", s:{striking:95,power:93,wrestling:83,jiujitsu:81,cardio:96,fightiq:92,chin:91,speed:95}},
+  {name:"Khamzat Chimaev", s:{striking:85,power:90,wrestling:100,jiujitsu:96,cardio:84,fightiq:87,chin:90,speed:93}},
+  {name:"Rampage Jackson",prime:true, s:{striking:92,power:100,wrestling:90,jiujitsu:80,cardio:90,fightiq:90,chin:91,speed:92}},
+  {name:"Charles Oliveira", s:{striking:91,power:94,wrestling:92,jiujitsu:100,cardio:91,fightiq:83,chin:84,speed:90}},
+  {name:"Brandon Moreno", s:{striking:88,power:86,wrestling:89,jiujitsu:91,cardio:92,fightiq:85,chin:97,speed:97}},
+  {name:"Stipe Miocic",prime:true, s:{striking:93,power:90,wrestling:88,jiujitsu:78,cardio:95,fightiq:93,chin:92,speed:92}},
+  {name:"Ian Machado Garry", s:{striking:97,power:88,wrestling:86,jiujitsu:84,cardio:90,fightiq:91,chin:91,speed:95}},
+  {name:"Shavkat Rakhmonov", s:{striking:90,power:91,wrestling:92,jiujitsu:89,cardio:91,fightiq:88,chin:95,speed:86}},
+  {name:"Anthony Pettis",prime:true, s:{striking:96,power:90,wrestling:84,jiujitsu:87,cardio:90,fightiq:92,chin:92,speed:91}},
+  {name:"Jean Silva", s:{striking:94,power:94,wrestling:85,jiujitsu:89,cardio:88,fightiq:89,chin:90,speed:92}},
+  {name:"Nate Diaz",prime:true, s:{striking:89,power:83,wrestling:78,jiujitsu:95,cardio:100,fightiq:86,chin:100,speed:90}},
+  {name:"Anderson Silva",prime:true, s:{striking:100,power:93,wrestling:73,jiujitsu:80,cardio:92,fightiq:95,chin:90,speed:97}},
+  {name:"Song Yadong", s:{striking:90,power:94,wrestling:88,jiujitsu:84,cardio:88,fightiq:89,chin:95,speed:92}},
+  {name:"Justin Gaethje", s:{striking:97,power:95,wrestling:89,jiujitsu:70,cardio:91,fightiq:91,chin:95,speed:92}},
+  {name:"Merab Dvalishvili", s:{striking:79,power:76,wrestling:98,jiujitsu:87,cardio:100,fightiq:87,chin:100,speed:93}},
+  {name:"Josh Hokit", s:{striking:88,power:90,wrestling:94,jiujitsu:89,cardio:90,fightiq:82,chin:90,speed:95}},
+  {name:"Junior Dos Santos",prime:true, s:{striking:94,power:95,wrestling:83,jiujitsu:85,cardio:90,fightiq:88,chin:90,speed:93}},
+  {name:"Dricus du Plessis", s:{striking:93,power:92,wrestling:84,jiujitsu:84,cardio:93,fightiq:91,chin:92,speed:89}},
+  {name:"Frankie Edgar",prime:true, s:{striking:88,power:80,wrestling:92,jiujitsu:87,cardio:96,fightiq:90,chin:95,speed:91}},
+  {name:"Quillan Salkilld", s:{striking:91,power:90,wrestling:90,jiujitsu:90,cardio:89,fightiq:89,chin:89,speed:89}},
+  {name:"Eddie Alvarez",prime:true, s:{striking:87,power:88,wrestling:91,jiujitsu:86,cardio:92,fightiq:87,chin:97,speed:89}},
+  {name:"Ciryl Gane", s:{striking:100,power:94,wrestling:77,jiujitsu:74,cardio:90,fightiq:90,chin:90,speed:100}},
+  {name:"Rafael Dos Anjos",prime:true, s:{striking:90,power:82,wrestling:90,jiujitsu:89,cardio:95,fightiq:90,chin:90,speed:89}},
+  {name:"Mirko Cro Cop",prime:true, s:{striking:99,power:96,wrestling:75,jiujitsu:70,cardio:92,fightiq:94,chin:90,speed:97}},
+  {name:"Manel Kape", s:{striking:95,power:95,wrestling:77,jiujitsu:77,cardio:89,fightiq:91,chin:89,speed:100}},
+  {name:"AJ McKee", s:{striking:88,power:88,wrestling:88,jiujitsu:90,cardio:87,fightiq:88,chin:93,speed:90}},
+  {name:"Paddy Pimblett", s:{striking:82,power:84,wrestling:88,jiujitsu:95,cardio:87,fightiq:89,chin:97,speed:90}},
+  {name:"Magomed Ankalaev", s:{striking:93,power:89,wrestling:90,jiujitsu:83,cardio:90,fightiq:90,chin:87,speed:90}},
+  {name:"Edson Barboza",prime:true, s:{striking:94,power:92,wrestling:80,jiujitsu:83,cardio:88,fightiq:88,chin:89,speed:98}},
+  {name:"Robert Whittaker", s:{striking:94,power:87,wrestling:88,jiujitsu:87,cardio:90,fightiq:90,chin:81,speed:95}},
+  {name:"Nassourdine Imavov", s:{striking:93,power:86,wrestling:86,jiujitsu:83,cardio:89,fightiq:89,chin:90,speed:95}},
+  {name:"Sean Strickland", s:{striking:92,power:80,wrestling:90,jiujitsu:80,cardio:98,fightiq:92,chin:90,speed:89}},
+  {name:"Umar Nurmagomedov", s:{striking:89,power:81,wrestling:94,jiujitsu:89,cardio:89,fightiq:88,chin:88,speed:91}},
+  {name:"Dustin Poirier",prime:true, s:{striking:94,power:91,wrestling:82,jiujitsu:82,cardio:92,fightiq:89,chin:90,speed:89}},
+  {name:"Curtis Blaydes", s:{striking:85,power:90,wrestling:94,jiujitsu:80,cardio:89,fightiq:88,chin:94,speed:88}},
+  {name:"Yaroslav Amosov", s:{striking:83,power:82,wrestling:96,jiujitsu:95,cardio:90,fightiq:88,chin:88,speed:86}},
+  {name:"Donald Cerrone",prime:true, s:{striking:91,power:89,wrestling:88,jiujitsu:89,cardio:90,fightiq:86,chin:86,speed:89}},
+  {name:"Michael Johnson",prime:true, s:{striking:91,power:90,wrestling:89,jiujitsu:75,cardio:89,fightiq:85,chin:89,speed:100}},
+  {name:"Max Holloway", s:{striking:95,power:85,wrestling:70,jiujitsu:75,cardio:100,fightiq:87,chin:99,speed:96}},
+  {name:"Patricio Pitbull", s:{striking:88,power:90,wrestling:85,jiujitsu:89,cardio:90,fightiq:89,chin:88,speed:87}},
+  {name:"Alistair Overeem",prime:true, s:{striking:95,power:92,wrestling:83,jiujitsu:79,cardio:90,fightiq:90,chin:80,speed:90}},
+  {name:"Chito Vera", s:{striking:87,power:89,wrestling:83,jiujitsu:84,cardio:94,fightiq:81,chin:100,speed:80}},
+  {name:"Jiri Prochazka", s:{striking:90,power:94,wrestling:82,jiujitsu:80,cardio:94,fightiq:79,chin:84,speed:92}},
+  {name:"Sean Brady", s:{striking:78,power:75,wrestling:92,jiujitsu:98,cardio:90,fightiq:87,chin:82,speed:92}},
+  {name:"Carlos Prates", s:{striking:96,power:99,wrestling:73,jiujitsu:75,cardio:84,fightiq:87,chin:90,speed:90}},
+  {name:"Anthony Hernandez", s:{striking:76,power:74,wrestling:91,jiujitsu:92,cardio:98,fightiq:88,chin:85,speed:89}},
+  {name:"Cody Garbrandt",prime:true, s:{striking:92,power:95,wrestling:85,jiujitsu:75,cardio:90,fightiq:80,chin:75,speed:100}},
+  {name:"Aljamain Sterling", s:{striking:80,power:72,wrestling:97,jiujitsu:97,cardio:91,fightiq:89,chin:81,speed:85}},
+  {name:"Joe Pyfer", s:{striking:84,power:96,wrestling:83,jiujitsu:84,cardio:83,fightiq:86,chin:91,speed:85}},
+  {name:"Stephen Thompson",prime:true, s:{striking:97,power:88,wrestling:72,jiujitsu:72,cardio:88,fightiq:92,chin:90,speed:92}},
+  {name:"Belal Muhammad", s:{striking:78,power:74,wrestling:91,jiujitsu:84,cardio:96,fightiq:88,chin:94,speed:86}},
+  {name:"Conor McGregor",prime:true, s:{striking:98,power:96,wrestling:70,jiujitsu:70,cardio:75,fightiq:93,chin:92,speed:96}},
+  {name:"Jack Della Maddalena", s:{striking:91,power:89,wrestling:75,jiujitsu:76,cardio:90,fightiq:89,chin:90,speed:90}},
+  {name:"Israel Adesanya",prime:true, s:{striking:99,power:80,wrestling:68,jiujitsu:65,cardio:94,fightiq:96,chin:90,speed:97}},
+  {name:"Brian Ortega", s:{striking:80,power:78,wrestling:83,jiujitsu:97,cardio:91,fightiq:81,chin:93,speed:83}},
+  {name:"Bo Nickal", s:{striking:78,power:84,wrestling:100,jiujitsu:84,cardio:85,fightiq:83,chin:82,speed:90}},
+  {name:"Leon Edwards", s:{striking:92,power:83,wrestling:83,jiujitsu:79,cardio:90,fightiq:84,chin:85,speed:89}},
+  {name:"Benoit Saint Denis", s:{striking:82,power:87,wrestling:90,jiujitsu:90,cardio:88,fightiq:75,chin:88,speed:85}},
+  {name:"Mauricio Ruffy", s:{striking:97,power:91,wrestling:73,jiujitsu:72,cardio:85,fightiq:87,chin:85,speed:94}},
+  {name:"Kevin Holland", s:{striking:87,power:89,wrestling:75,jiujitsu:82,cardio:84,fightiq:80,chin:97,speed:90}},
+  {name:"Dan Ige", s:{striking:85,power:89,wrestling:80,jiujitsu:80,cardio:90,fightiq:85,chin:90,speed:85}},
+  {name:"Shara Magomedov", s:{striking:92,power:89,wrestling:72,jiujitsu:70,cardio:88,fightiq:83,chin:94,speed:95}},
+  {name:"Paulo Costa", s:{striking:90,power:90,wrestling:82,jiujitsu:80,cardio:85,fightiq:80,chin:86,speed:90}},
+  {name:"Sean O'Malley", s:{striking:96,power:94,wrestling:60,jiujitsu:65,cardio:86,fightiq:91,chin:91,speed:98}},
+  {name:"Francis Ngannou", s:{striking:85,power:100,wrestling:79,jiujitsu:72,cardio:73,fightiq:84,chin:95,speed:92}},
+  {name:"Alex Pereira", s:{striking:98,power:99,wrestling:60,jiujitsu:55,cardio:90,fightiq:93,chin:93,speed:92}},
+  {name:"Dooho Choi", s:{striking:88,power:93,wrestling:78,jiujitsu:77,cardio:82,fightiq:82,chin:89,speed:90}},
+  {name:"Rafael Fiziev", s:{striking:92,power:85,wrestling:75,jiujitsu:72,cardio:87,fightiq:82,chin:89,speed:97}},
+  {name:"King Green", s:{striking:90,power:87,wrestling:82,jiujitsu:81,cardio:89,fightiq:82,chin:80,speed:88}},
+  {name:"Brendan Allen", s:{striking:82,power:80,wrestling:87,jiujitsu:89,cardio:90,fightiq:82,chin:82,speed:87}},
+  {name:"Raul Rosas Jr", s:{striking:75,power:80,wrestling:87,jiujitsu:90,cardio:89,fightiq:82,chin:89,speed:92}},
+  {name:"Mateusz Gamrot", s:{striking:73,power:70,wrestling:93,jiujitsu:90,cardio:91,fightiq:85,chin:86,speed:89}},
+  {name:"Calvin Kattar", s:{striking:85,power:82,wrestling:77,jiujitsu:74,cardio:90,fightiq:84,chin:97,speed:88}},
+  {name:"Giga Chikadze", s:{striking:89,power:88,wrestling:78,jiujitsu:78,cardio:83,fightiq:85,chin:85,speed:90}},
+  {name:"Joaquin Buckley", s:{striking:90,power:92,wrestling:74,jiujitsu:65,cardio:87,fightiq:85,chin:86,speed:96}},
+  {name:"Charles Johnson", s:{striking:87,power:85,wrestling:80,jiujitsu:78,cardio:87,fightiq:81,chin:85,speed:92}},
+  {name:"Vicente Luque", s:{striking:82,power:82,wrestling:83,jiujitsu:90,cardio:85,fightiq:80,chin:83,speed:90}},
+  {name:"Khalil Rountree Jr", s:{striking:92,power:93,wrestling:73,jiujitsu:72,cardio:83,fightiq:83,chin:84,speed:94}},
+  {name:"Reinier de Ridder", s:{striking:83,power:84,wrestling:91,jiujitsu:96,cardio:71,fightiq:82,chin:89,speed:78}},
+  {name:"Aleksandar Rakic", s:{striking:87,power:90,wrestling:80,jiujitsu:78,cardio:88,fightiq:82,chin:80,speed:88}},
+  {name:"Renato Moicano", s:{striking:84,power:82,wrestling:89,jiujitsu:92,cardio:73,fightiq:87,chin:84,speed:82}},
+  {name:"Marvin Vettori", s:{striking:85,power:80,wrestling:82,jiujitsu:77,cardio:85,fightiq:80,chin:100,speed:82}},
+  {name:"Nursulton Ruziboev", s:{striking:75,power:83,wrestling:88,jiujitsu:89,cardio:86,fightiq:85,chin:84,speed:81}},
+  {name:"Gable Steveson", s:{striking:75,power:88,wrestling:100,jiujitsu:82,cardio:86,fightiq:78,chin:70,speed:91}},
+  {name:"Charles Jourdain", s:{striking:83,power:81,wrestling:83,jiujitsu:81,cardio:88,fightiq:81,chin:84,speed:89}},
+  {name:"Bilal Hasan", s:{striking:89,power:87,wrestling:74,jiujitsu:80,cardio:84,fightiq:80,chin:85,speed:90}},
+  {name:"Josh Emmett", s:{striking:84,power:98,wrestling:72,jiujitsu:65,cardio:91,fightiq:82,chin:90,speed:88}},
+  {name:"Bryce Mitchell", s:{striking:72,power:69,wrestling:90,jiujitsu:91,cardio:88,fightiq:83,chin:82,speed:85}},
+  {name:"Chris Curtis", s:{striking:84,power:88,wrestling:78,jiujitsu:77,cardio:83,fightiq:80,chin:89,speed:80}},
+  {name:"Jamahal Hill", s:{striking:87,power:90,wrestling:80,jiujitsu:75,cardio:82,fightiq:83,chin:80,speed:80}},
+  {name:"Brock Lesnar",prime:true, s:{striking:74,power:96,wrestling:92,jiujitsu:77,cardio:74,fightiq:83,chin:83,speed:78}},
+  {name:"Dominick Reyes", s:{striking:85,power:90,wrestling:80,jiujitsu:70,cardio:84,fightiq:82,chin:72,speed:92}},
+  {name:"Grant Dawson", s:{striking:73,power:72,wrestling:91,jiujitsu:88,cardio:89,fightiq:83,chin:73,speed:85}},
+  {name:"Beneil Dariush", s:{striking:82,power:82,wrestling:90,jiujitsu:90,cardio:89,fightiq:82,chin:60,speed:78}},
+  {name:"Kelvin Gastelum", s:{striking:76,power:83,wrestling:82,jiujitsu:68,cardio:91,fightiq:70,chin:100,speed:82}},
+  {name:"Michael Chandler", s:{striking:80,power:91,wrestling:87,jiujitsu:70,cardio:80,fightiq:78,chin:73,speed:90}},
+  {name:"Terrance McKinney", s:{striking:86,power:95,wrestling:88,jiujitsu:83,cardio:65,fightiq:60,chin:70,speed:98}},
+  {name:"Cody Durden", s:{striking:80,power:80,wrestling:83,jiujitsu:77,cardio:82,fightiq:75,chin:82,speed:85}},
+  {name:"Daniel Rodriguez", s:{striking:83,power:84,wrestling:75,jiujitsu:75,cardio:80,fightiq:80,chin:88,speed:77}},
+  {name:"Jalin Turner", s:{striking:82,power:85,wrestling:74,jiujitsu:74,cardio:77,fightiq:77,chin:81,speed:88}},
+  {name:"Gerald Meerschaert", s:{striking:70,power:81,wrestling:83,jiujitsu:90,cardio:83,fightiq:80,chin:75,speed:72}},
+  {name:"Alex Hernandez", s:{striking:80,power:83,wrestling:76,jiujitsu:73,cardio:77,fightiq:74,chin:80,speed:88}},
+  {name:"Robelis Despaigne", s:{striking:88,power:95,wrestling:68,jiujitsu:65,cardio:70,fightiq:80,chin:81,speed:83}},
+  {name:"Andre Fili", s:{striking:77,power:75,wrestling:77,jiujitsu:74,cardio:82,fightiq:74,chin:78,speed:89}},
+  {name:"Jordan Leavitt", s:{striking:70,power:64,wrestling:81,jiujitsu:82,cardio:82,fightiq:78,chin:88,speed:79}},
+  {name:"Shamil Gaziev", s:{striking:84,power:91,wrestling:85,jiujitsu:72,cardio:60,fightiq:80,chin:80,speed:72}},
+  {name:"Chase Hooper", s:{striking:70,power:70,wrestling:83,jiujitsu:86,cardio:85,fightiq:75,chin:70,speed:75}},
+  {name:"Johnny Walker", s:{striking:80,power:90,wrestling:65,jiujitsu:67,cardio:82,fightiq:60,chin:69,speed:92}},
+  {name:"Tai Tuivasa", s:{striking:85,power:95,wrestling:62,jiujitsu:51,cardio:65,fightiq:74,chin:88,speed:71}},
+  {name:"Mark Hunt",prime:true, s:{striking:87,power:100,wrestling:45,jiujitsu:30,cardio:60,fightiq:70,chin:100,speed:80}},
+  {name:"Valter Walker", s:{striking:67,power:67,wrestling:67,jiujitsu:100,cardio:67,fightiq:67,chin:67,speed:67}},
+  {name:"Derrick Lewis", s:{striking:72,power:100,wrestling:60,jiujitsu:55,cardio:50,fightiq:73,chin:70,speed:68}},
+  {name:"Kron Gracie", s:{striking:45,power:50,wrestling:63,jiujitsu:90,cardio:77,fightiq:70,chin:78,speed:70}},
+  {name:"CM Punk",prime:true, s:{striking:30,power:45,wrestling:58,jiujitsu:50,cardio:60,fightiq:20,chin:72,speed:21}},
+  {name:"Raoni Barcelos", s:{striking:88,power:83,wrestling:89,jiujitsu:89,cardio:86,fightiq:82,chin:85,speed:88}},
+  {name:"Sedriques Dumas", s:{striking:72,power:73,wrestling:69,jiujitsu:65,cardio:70,fightiq:65,chin:70,speed:74}},
+  {name:"Rodolfo Bellato", s:{striking:73,power:75,wrestling:73,jiujitsu:70,cardio:71,fightiq:67,chin:85,speed:72}},
+  {name:"Esteban Ribovics", s:{striking:80,power:80,wrestling:77,jiujitsu:77,cardio:80,fightiq:78,chin:83,speed:80}},
+  {name:"Ateba Gautier", s:{striking:85,power:95,wrestling:75,jiujitsu:75,cardio:69,fightiq:73,chin:87,speed:85}},
+  {name:"Roman Kopylov", s:{striking:85,power:88,wrestling:78,jiujitsu:75,cardio:80,fightiq:78,chin:85,speed:82}},
+  {name:"Payton Talbott", s:{striking:90,power:89,wrestling:76,jiujitsu:73,cardio:85,fightiq:84,chin:89,speed:89}},
+  {name:"Marcus McGhee", s:{striking:86,power:88,wrestling:78,jiujitsu:73,cardio:86,fightiq:83,chin:89,speed:84}},
+  {name:"Henry Cejudo",prime:true, s:{striking:90,power:89,wrestling:100,jiujitsu:94,cardio:95,fightiq:94,chin:95,speed:92}},
+  {name:"Pedro Munhoz", s:{striking:85,power:87,wrestling:87,jiujitsu:84,cardio:88,fightiq:80,chin:100,speed:88}},
+  {name:"Roy Nelson",prime:true, s:{striking:82,power:95,wrestling:60,jiujitsu:60,cardio:69,fightiq:69,chin:99,speed:70}},
+  {name:"Movsar Evloev", s:{striking:83,power:80,wrestling:98,jiujitsu:94,cardio:99,fightiq:88,chin:94,speed:90}},
+  {name:"Alexander Volkov", s:{striking:91,power:89,wrestling:83,jiujitsu:80,cardio:88,fightiq:88,chin:87,speed:87}},
+  {name:"Valentina Shevchenko",sex:'f', s:{striking:100,power:89,wrestling:99,jiujitsu:93,cardio:100,fightiq:100,chin:88,speed:97}},
+  {name:"Amanda Nunes",sex:'f', s:{striking:98,power:100,wrestling:94,jiujitsu:94,cardio:93,fightiq:98,chin:92,speed:93}},
+  {name:"Zhang Weili",sex:'f', s:{striking:97,power:97,wrestling:95,jiujitsu:88,cardio:98,fightiq:95,chin:89,speed:100}},
+  {name:"Alexa Grasso",sex:'f', s:{striking:98,power:94,wrestling:90,jiujitsu:90,cardio:97,fightiq:92,chin:100,speed:97}},
+  {name:"Rose Namajunas",sex:'f', s:{striking:98,power:91,wrestling:89,jiujitsu:90,cardio:96,fightiq:93,chin:90,speed:95}},
+  {name:"Dakota Ditcheva",sex:'f', s:{striking:100,power:99,wrestling:85,jiujitsu:83,cardio:91,fightiq:92,chin:92,speed:97}},
+  {name:"Joanna Jędrzejczyk",prime:true,sex:'f', s:{striking:100,power:87,wrestling:80,jiujitsu:75,cardio:100,fightiq:96,chin:91,speed:100}},
+  {name:"Liz Carmouche",prime:true,sex:'f', s:{striking:94,power:91,wrestling:88,jiujitsu:89,cardio:90,fightiq:90,chin:97,speed:90}},
+  {name:"Fatima Kline",sex:'f', s:{striking:91,power:93,wrestling:90,jiujitsu:89,cardio:90,fightiq:90,chin:90,speed:89}},
+  {name:"Kayla Harrison",sex:'f', s:{striking:80,power:86,wrestling:100,jiujitsu:100,cardio:88,fightiq:94,chin:92,speed:82}},
+  {name:"Natalia Silva",sex:'f', s:{striking:96,power:88,wrestling:80,jiujitsu:80,cardio:94,fightiq:93,chin:92,speed:97}},
+  {name:"Manon Fiorot",sex:'f', s:{striking:95,power:95,wrestling:86,jiujitsu:77,cardio:93,fightiq:92,chin:87,speed:89}},
+  {name:"Ronda Rousey",prime:true,sex:'f', s:{striking:77,power:88,wrestling:100,jiujitsu:100,cardio:90,fightiq:89,chin:80,speed:88}},
+  {name:"Holly Holm",prime:true,sex:'f', s:{striking:99,power:95,wrestling:80,jiujitsu:79,cardio:93,fightiq:90,chin:88,speed:85}},
+  {name:"Tatiana Suarez",sex:'f', s:{striking:73,power:78,wrestling:100,jiujitsu:97,cardio:89,fightiq:90,chin:100,speed:82}},
+  {name:"Cris Cyborg",prime:true,sex:'f', s:{striking:95,power:100,wrestling:87,jiujitsu:80,cardio:94,fightiq:84,chin:83,speed:84}},
+  {name:"Michelle Waterson",prime:true,sex:'f', s:{striking:92,power:78,wrestling:78,jiujitsu:80,cardio:91,fightiq:94,chin:90,speed:100}},
+  {name:"Jessica Andrade",sex:'f', s:{striking:89,power:100,wrestling:82,jiujitsu:88,cardio:87,fightiq:82,chin:85,speed:90}},
+  {name:"Erin Blanchfield",sex:'f', s:{striking:84,power:70,wrestling:94,jiujitsu:97,cardio:89,fightiq:88,chin:92,speed:85}},
+  {name:"Wang Cong",sex:'f', s:{striking:89,power:90,wrestling:80,jiujitsu:83,cardio:88,fightiq:87,chin:88,speed:93}},
+  {name:"Miesha Tate",sex:'f', s:{striking:79,power:81,wrestling:94,jiujitsu:90,cardio:92,fightiq:90,chin:88,speed:82}},
+  {name:"Tecia Torres",sex:'f', s:{striking:85,power:74,wrestling:79,jiujitsu:83,cardio:92,fightiq:82,chin:95,speed:100}},
+  {name:"Angela Hill",sex:'f', s:{striking:84,power:70,wrestling:80,jiujitsu:80,cardio:98,fightiq:83,chin:100,speed:94}},
+  {name:"Alexia Thainara",sex:'f', s:{striking:81,power:73,wrestling:91,jiujitsu:96,cardio:85,fightiq:85,chin:87,speed:89}},
+  {name:"Maycee Barber",sex:'f', s:{striking:83,power:90,wrestling:85,jiujitsu:84,cardio:90,fightiq:84,chin:84,speed:86}},
+  {name:"Ailin Perez",sex:'f', s:{striking:78,power:77,wrestling:82,jiujitsu:80,cardio:88,fightiq:77,chin:85,speed:82}},
+  {name:"Makenzie Dern",sex:'f', s:{striking:77,power:73,wrestling:98,jiujitsu:100,cardio:94,fightiq:88,chin:87,speed:83}},
+  {name:"Jasmine Jasudavicius",sex:'f', s:{striking:77,power:73,wrestling:91,jiujitsu:95,cardio:91,fightiq:90,chin:84,speed:78}},
+  {name:"Joselyne Edwards",sex:'f', s:{striking:87,power:89,wrestling:80,jiujitsu:82,cardio:86,fightiq:84,chin:90,speed:80}},
+  {name:"Virna Jandiroba",sex:'f', s:{striking:78,power:68,wrestling:88,jiujitsu:94,cardio:90,fightiq:90,chin:92,speed:78}},
+  {name:"Raquel Pennington",sex:'f', s:{striking:76,power:82,wrestling:80,jiujitsu:74,cardio:95,fightiq:85,chin:100,speed:83}},
+  {name:"Miranda Maverick",sex:'f', s:{striking:78,power:74,wrestling:87,jiujitsu:89,cardio:88,fightiq:82,chin:88,speed:87}},
+  {name:"Amada Ribas",sex:'f', s:{striking:84,power:70,wrestling:88,jiujitsu:90,cardio:88,fightiq:81,chin:82,speed:85}},
+  {name:"Gillian Robertson",sex:'f', s:{striking:77,power:67,wrestling:90,jiujitsu:93,cardio:86,fightiq:84,chin:84,speed:87}},
+  {name:"Carla Esparza",prime:true,sex:'f', s:{striking:72,power:60,wrestling:96,jiujitsu:90,cardio:92,fightiq:86,chin:87,speed:84}},
+  {name:"Tabatha Ricci",sex:'f', s:{striking:77,power:73,wrestling:84,jiujitsu:84,cardio:89,fightiq:81,chin:86,speed:86}},
+  {name:"Julianna Pena",sex:'f', s:{striking:75,power:70,wrestling:85,jiujitsu:89,cardio:88,fightiq:75,chin:97,speed:80}},
+  {name:"Loopy Godinez",sex:'f', s:{striking:79,power:68,wrestling:84,jiujitsu:82,cardio:93,fightiq:80,chin:88,speed:83}},
+  {name:"Macy Chiasson",sex:'f', s:{striking:80,power:84,wrestling:78,jiujitsu:70,cardio:85,fightiq:82,chin:84,speed:78}},
+  {name:"Norma Dumont",sex:'f', s:{striking:83,power:75,wrestling:79,jiujitsu:65,cardio:88,fightiq:78,chin:88,speed:72}},
+  {name:"Jessica Eye",sex:'f', s:{striking:79,power:75,wrestling:76,jiujitsu:70,cardio:84,fightiq:79,chin:83,speed:82}},
+  {name:"Molly McCann",sex:'f', s:{striking:78,power:86,wrestling:70,jiujitsu:60,cardio:76,fightiq:71,chin:83,speed:74}},
+  {name:"Bethe Correia",sex:'f', s:{striking:70,power:74,wrestling:70,jiujitsu:67,cardio:77,fightiq:60,chin:64,speed:74}},
+  {name:"Ashley Yoder",sex:'f', s:{striking:67,power:55,wrestling:68,jiujitsu:73,cardio:75,fightiq:69,chin:77,speed:70}},
+  {name:"Diana Belbiță",sex:'f', s:{striking:72,power:73,wrestling:50,jiujitsu:55,cardio:75,fightiq:55,chin:86,speed:77}},
+  {name:"Gina Mazany",sex:'f', s:{striking:55,power:70,wrestling:64,jiujitsu:66,cardio:74,fightiq:60,chin:50,speed:67}},
+  {name:"Polyana Viana",sex:'f', s:{striking:73,power:78,wrestling:70,jiujitsu:83,cardio:78,fightiq:69,chin:80,speed:73}},
+  {name:"Jessica Rose-Clark",sex:'f', s:{striking:68,power:75,wrestling:65,jiujitsu:55,cardio:77,fightiq:66,chin:80,speed:78}},
+  {name:"Yana Santos",sex:'f', s:{striking:77,power:70,wrestling:70,jiujitsu:70,cardio:78,fightiq:79,chin:79,speed:79}},
+  {name:"Luana Santos",sex:'f', s:{striking:80,power:81,wrestling:85,jiujitsu:85,cardio:78,fightiq:82,chin:85,speed:81}},
+  {name:"Jacqueline Cavalcanti",sex:'f', s:{striking:83,power:76,wrestling:75,jiujitsu:75,cardio:80,fightiq:80,chin:80,speed:80}},
+  {name:"Karol Rosa",sex:'f', s:{striking:80,power:80,wrestling:75,jiujitsu:72,cardio:79,fightiq:80,chin:85,speed:82}},
+  {name:"Bia Mesquita",sex:'f', s:{striking:74,power:72,wrestling:82,jiujitsu:100,cardio:82,fightiq:80,chin:80,speed:76}},
+  {name:"Nora Cornolle",sex:'f', s:{striking:82,power:80,wrestling:78,jiujitsu:72,cardio:85,fightiq:80,chin:82,speed:85}},
+  {name:"Melissa Croden",sex:'f', s:{striking:80,power:80,wrestling:82,jiujitsu:80,cardio:83,fightiq:78,chin:82,speed:80}},
+  {name:"Denise Gomes",sex:'f', s:{striking:87,power:90,wrestling:74,jiujitsu:78,cardio:82,fightiq:80,chin:82,speed:87}},
+  {name:"Yan Xiaonan",sex:'f', s:{striking:90,power:84,wrestling:82,jiujitsu:80,cardio:90,fightiq:88,chin:82,speed:88}},
+  {name:"Amanda Lemos",sex:'f', s:{striking:87,power:94,wrestling:78,jiujitsu:88,cardio:82,fightiq:82,chin:85,speed:85}},
+  {name:"Mizuki",sex:'f', s:{striking:84,power:76,wrestling:80,jiujitsu:82,cardio:90,fightiq:83,chin:86,speed:82}},
+  {name:"Tracy Cortez",sex:'f', s:{striking:87,power:84,wrestling:82,jiujitsu:75,cardio:83,fightiq:83,chin:90,speed:86}},
+  {name:"Karine Silva",sex:'f', s:{striking:82,power:85,wrestling:84,jiujitsu:90,cardio:82,fightiq:82,chin:82,speed:82}},
+  {name:"Casey O'Neil",sex:'f', s:{striking:88,power:90,wrestling:87,jiujitsu:88,cardio:86,fightiq:83,chin:82,speed:84}},
+  {name:"Eduarda Moura",sex:'f', s:{striking:79,power:80,wrestling:85,jiujitsu:88,cardio:84,fightiq:80,chin:82,speed:82}},
+  {name:"Gabriella Fernandes",sex:'f', s:{striking:80,power:80,wrestling:80,jiujitsu:82,cardio:83,fightiq:79,chin:80,speed:82}},
+  {name:"Regina Tarin",sex:'f', s:{striking:83,power:82,wrestling:82,jiujitsu:80,cardio:85,fightiq:80,chin:82,speed:84}},
+  {name:"Gina Carano",prime:true,sex:'f', s:{striking:82,power:81,wrestling:75,jiujitsu:73,cardio:78,fightiq:80,chin:81,speed:80}}
+];
+
+const CATS = [
+  {key:"striking",  label:"Striking"},
+  {key:"power",     label:"Power"},
+  {key:"wrestling", label:"Wrestling"},
+  {key:"jiujitsu",  label:"Jiu Jitsu"},
+  {key:"cardio",    label:"Cardio"},
+  {key:"fightiq",   label:"Fight IQ"},
+  {key:"chin",      label:"Chin"},
+  {key:"speed",     label:"Speed"}
+];
+
+const BONUS_MIN_OVERALL = 93;   // overall rating needed to unlock the bonus
+
+const IMG_DIR = 'images';
+const IMG_EXT = 'webp';
+function slug(name){
+  return name.toLowerCase().replace(/['\u2018\u2019.]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+}
+function imgPath(name){ return IMG_DIR+'/'+slug(name)+'.'+IMG_EXT; }
+function initials(name){
+  return name.replace(/['\u2018\u2019]/g,'').split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+function photoHTML(name, size){
+  return '<div class="octa '+size+'"><div class="ring"></div><div class="fill">'
+    + '<img src="'+imgPath(name)+'" alt="'+name+'" loading="lazy" '
+    + 'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">'
+    + '<div class="fallback" style="display:none">'+initials(name)+'</div>'
+    + '</div></div>';
+}
+
+let pool=[], current=null, respins=1, round=0, build={};
+let coaches=1;         // one coach use per game
+let coachBonus=null;   // {skillKey:+pct,...} applied to the fighter on the clock
+let coachThree=null;   // the 3 coaches drawn for the current fighter (locked once drawn)
+let division='male';   // 'male' | 'female' — set from the start-screen toggle
+
+// Coaches boost the fighter currently on the clock (percentages of that fighter's own stat).
+// Keys: striking,power,wrestling,jiujitsu,cardio,fightiq,chin,speed
+const COACHES = [
+  {name:"Trevor Wittman",          b:{striking:4, fightiq:2, power:2}},
+  {name:"Henri Hooft",             b:{striking:3, power:2}},
+  {name:"Jason Parillo",           b:{striking:3}},
+  {name:"Mark Henry",              b:{striking:2, speed:2}},
+  {name:"Duane Ludwig",            b:{striking:3, fightiq:2, power:2}},
+  {name:"Duke Roufus",             b:{striking:2, power:2}},
+  {name:"Eugene Bareman",          b:{striking:2, fightiq:2, speed:2}},
+  {name:"Plinio Cruz",             b:{striking:2, power:2}},
+  {name:"Eric Nicksick",           b:{striking:2, fightiq:2, cardio:2}},
+  {name:"Tim Welch",               b:{striking:2, fightiq:2, wrestling:-3, jiujitsu:-3, cardio:-2}},
+  {name:"Pablo Sucupira",          b:{striking:2, fightiq:2, power:2}},
+  {name:"John Danaher",            b:{jiujitsu:3}},
+  {name:"Cesar Gracie",            b:{jiujitsu:3}},
+  {name:"Urijah Faber",            b:{jiujitsu:2, wrestling:2}},
+  {name:"Ray Longo",               b:{wrestling:3, cardio:2}},
+  {name:"Eric Albarracin",         b:{wrestling:2}},
+  {name:"Marc Montoya",            b:{jiujitsu:2, striking:1}},
+  {name:"Greg Jackson",            b:{fightiq:3, striking:3}},
+  {name:"Mike Brown",              b:{fightiq:3, cardio:2, chin:2, striking:2}},
+  {name:"James Krause",            b:{fightiq:2}},
+  {name:"Firas Zahabi",            b:{fightiq:3, jiujitsu:2, chin:2}},
+  {name:"Javier Mendez",           b:{cardio:2, chin:-2, striking:2}},
+  {name:"John Wood",               b:{cardio:3, speed:3}},
+  {name:"André Pederneiras",       b:{speed:2, power:2, striking:2}},
+  {name:"Diego Lima",              b:{speed:2, power:2, fightiq:2, jiujitsu:2, wrestling:2}},
+  {name:"Abdulmanap Nurmagomedov", b:{wrestling:5, jiujitsu:4, cardio:4, fightiq:2}},
+  {name:"Rafael Cordeiro",         b:{striking:1.5, power:1.5, wrestling:1.5, jiujitsu:1.5, cardio:1.5, fightiq:1.5, chin:1.5, speed:1.5}},
+  {name:"John Kavanagh",           b:{fightiq:-2}},
+  {name:"Edmond Tarverdyan",       b:{striking:-3}},
+  {name:"Joshua Fabia",            b:{striking:-3, power:-3, wrestling:-3, jiujitsu:-3, cardio:-3, fightiq:-3, chin:-3, speed:-3}}
+];
+const CATLABEL = {striking:'Striking',power:'Power',wrestling:'Wrestling',jiujitsu:'Jiu Jitsu',cardio:'Cardio',fightiq:'Fight IQ',chin:'Chin',speed:'Speed'};
+// value of a skill for the current fighter after any coach boost (rounded, capped 0-100)
+function boostedVal(key){
+  let v = current.s[key];
+  if(coachBonus && coachBonus[key]){ v = v * (1 + coachBonus[key]/100); }
+  return Math.max(0, Math.min(100, Math.round(v)));
+}
+function coachDesc(c){
+  return Object.entries(c.b).map(([k,v])=>(v>0?'+':'')+v+'% '+CATLABEL[k]).join(', ');
+}
+
+function rosterFor(div){
+  // female fighters are flagged sex:'f'; everyone else is male by default
+  return FIGHTERS.filter(f => div==='female' ? f.sex==='f' : f.sex!=='f');
+}
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function startGame(){
+  const roster = rosterFor(division);
+  if(roster.length < 8){ return; }   // safety: need at least 8 to fill the slots
+  pool=shuffle(roster); round=0; respins=1; coaches=1; coachBonus=null; coachThree=null; build={};
+  if(pool.length){ const im=new Image(); im.src=imgPath(pool[0].name); } // warm first photo
+  show('screen-game'); nextFighter();
+}
+function currentTotal(){ return CATS.reduce((t,c)=>t+(build[c.key]?build[c.key].value:0),0); }
+function nextFighter(){ current=pool.shift(); coachBonus=null; coachThree=null; hideCoachPick(); renderRound(); preloadNext(); }
+function preloadNext(){ if(pool.length){ const im=new Image(); im.src=imgPath(pool[0].name); } }
+function respin(){
+  if(respins<=0||pool.length===0) return;
+  respins--; current=pool.shift(); coachBonus=null; coachThree=null; hideCoachPick(); renderRound(); preloadNext();
+}
+function hideCoachPick(){ document.getElementById('coachPick').classList.remove('show'); }
+// open the 3-coach picker
+function openCoachPick(){
+  if(coaches<=0 || coachBonus) return;
+  if(!coachThree){ coachThree = shuffle(COACHES).slice(0,3); }  // draw once, then locked
+  const three = coachThree;
+  const box=document.getElementById('coachPick');
+  box.innerHTML='<div class="cptitle">Pick a coach for '+current.name+'</div>'
+    + three.map((c,i)=>{
+        const cs=slug(c.name);
+        const ini=c.name.replace(/['\u2018\u2019]/g,'').split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+        const pic='<div class="cpic"><img src="images/coaches/'+cs+'.webp" alt="" loading="lazy" '
+          +'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">'
+          +'<div class="cpicfb" style="display:none">'+ini+'</div></div>';
+        return '<div class="coachcard" data-i="'+i+'">'+pic+'<div class="cn">'+c.name+'</div>'
+             + '<div class="cb">Tap to hire &#8250;</div></div>';
+      }).join('');
+  box.querySelectorAll('.coachcard').forEach(el=>{
+    el.addEventListener('click',()=>applyCoach(three[+el.dataset.i]));
+  });
+  box.classList.add('show');
+}
+function applyCoach(c){
+  coachBonus = Object.assign({}, c.b);
+  coaches--;
+  hideCoachPick();
+  renderRound();  // re-render so the coach button shows "applied" and slots reflect the boost
+}
+function renderRound(){
+  document.getElementById('roundNow').textContent=round+1;
+  document.getElementById('lockedCount').textContent=round;
+  document.getElementById('fName').textContent=current.name;
+  document.getElementById('fNameInline').textContent=current.name;
+  document.getElementById('primeTag').classList.toggle('on', !!current.prime);
+  document.getElementById('photoSlot').innerHTML=photoHTML(current.name,'big');
+
+  const rb=document.getElementById('btn-respin');
+  rb.disabled=(respins<=0);
+  rb.querySelector('.rtext').textContent = respins>0 ? 'Respin \u00B7 '+respins+' left' : 'Respin used';
+
+  const cb=document.getElementById('btn-coach');
+  cb.classList.toggle('applied', !!coachBonus);
+  cb.disabled = (coaches<=0 && !coachBonus);
+  cb.querySelector('.ctext').textContent = coachBonus ? 'Coached \u2713' : (coaches>0 ? 'Coach \u00B7 1 left' : 'Coach used');
+
+  const card=document.getElementById('fighterCard');
+  card.style.animation='none'; void card.offsetWidth; card.style.animation='';
+
+  const pips=document.getElementById('pips'); pips.innerHTML='';
+  for(let i=0;i<8;i++){
+    const p=document.createElement('div');
+    p.className='pip'+(i<round?' done':(i===round?' now':''));
+    pips.appendChild(p);
+  }
+
+  const slots=document.getElementById('slots'); slots.innerHTML='';
+  CATS.forEach(c=>{
+    const filled=build[c.key];
+    const el=document.createElement('div');
+    if(filled){
+      el.className='slot locked';
+      el.innerHTML='<div class="cat">'+c.label+'</div><div class="state">'+filled.name+'</div>';
+    }else{
+      el.className='slot open';
+      el.innerHTML='<div class="cat">'+c.label+'</div><div class="state">Lock in \u203A</div>';
+      el.addEventListener('click',()=>pick(c.key));
+    }
+    slots.appendChild(el);
+  });
+}
+function pick(key){
+  const base=current.s[key];
+  const val=boostedVal(key);
+  build[key]={name:current.name,value:val,base:base,delta:val-base,prime:!!current.prime};
+  round++;
+  if(round>=8){ renderResults(); } else { nextFighter(); }
+}
+
+const TIERS = [
+  {min:780,name:"The GOAT"},
+  {min:760,name:"Pound-for-Pound King"},
+  {min:740,name:"Champion"},
+  {min:720,name:"Title Contender"},
+  {min:710,name:"Top-5 Ranked"},
+  {min:690,name:"Prospect"},
+  {min:650,name:"Journeyman"},
+  {min:600,name:"PFL Average"},
+  {min:0,  name:"Amateur"}
+];
+
+function valColor(v){
+  if(v>=100) return '#20D878';   // elite / perfect — emerald green
+  if(v>=95)  return '#F5C542';   // exceptional — rich gold
+  if(v>=90)  return '#E5A928';   // excellent — warm amber
+  if(v>=85)  return '#D9C45A';   // very good — soft yellow
+  if(v>=70)  return '#E7E7E7';   // average / solid — off-white
+  return '#E05252';              // weak — muted red
+}
+function renderResults(){
+  const total=currentTotal();
+  const ovr=Math.round(total/8);
+  const tier=TIERS.find(t=>total>=t.min);
+  document.getElementById('scoreVal').textContent=total;
+  document.getElementById('ovrVal').textContent=ovr;
+  document.getElementById('tierName').textContent=tier.name;
+
+  const card=document.getElementById('resultCard'); card.innerHTML='';
+  CATS.forEach(c=>{
+    const b=build[c.key];
+    const row=document.createElement('div');
+    row.className='rrow';
+    const boosted = b.delta && b.delta!==0;
+    const boostChip = boosted
+      ? '<span class="rboost'+(b.delta<0?' down':'')+'">'+b.base+' \u2192</span>'
+      : '';
+    row.innerHTML='<div class="rl">'+photoHTML(b.name,'sm')
+      +'<div class="rtext"><div class="rcat">'+c.label+'</div><div class="rfighter">'+b.name+(b.prime?'<span class="rprime">Prime</span>':'')+'</div></div></div>'
+      +'<div class="rvalwrap">'+boostChip+'<div class="rval" style="color:'+valColor(b.value)+'">'+b.value+'</div></div>';
+    card.appendChild(row);
+  });
+
+  // ---- bonus gate ----
+  const slot=document.getElementById('bonusSlot');
+  if(ovr>=BONUS_MIN_OVERALL){
+    slot.innerHTML='<div class="bonusbox win">'
+      +'<div class="bhead">Bonus Unlocked</div>'
+      +'<p>That fighter is elite \u2014 you\u2019ve earned a special bonus every MMA fan can use right now.</p>'
+      +'</div>';
+    const b=document.createElement('button');
+    b.className='btn'; b.id='btn-bonus'; b.textContent='Claim The Bonus';
+    b.addEventListener('click',()=>openBonusScreen());
+    slot.appendChild(b);
+  }else{
+    const need=BONUS_MIN_OVERALL-ovr;
+    slot.innerHTML='<div class="bonusbox lose">'
+      +'<div class="bhead">No bonus this time</div>'
+      +'<p>Your score is not enough for the bonus. You need <b style="color:var(--gold)">'+BONUS_MIN_OVERALL+' overall</b> to unlock it \u2014 you\u2019re '+need+' point'+(need===1?'':'s')+' short.</p>'
+      +'<span class="req">Draft again to try for it</span>'
+      +'</div>';
+  }
+  show('screen-result');
+  openDiscordModal();
+}
+// Two rotating end-of-game offers — one is picked at random each game.
+const OFFERS = [
+  { banner:'images/whatnot-banner.jpg', alt:'Unlocked $25 bonus — claim yours now on Whatnot',
+    cta:'Spend on Whatnot', url:'https://www.whatnot.com/invite/homeoffightbreaks' },
+  { banner:'images/discord-banner.jpg', alt:'Unlocked — Home of Fight Picks MMA chat & betting Discord',
+    cta:'Join MMA Discord', url:'https://www.winible.com/checkout/1363223394291568749?pid=1582822718456222264&c=PERFECT' }
+];
+
+// 93+ bonus screen — one of these is picked at random each time the player claims.
+const BONUS_OFFERS = [
+  {
+    banner:'images/polymarket-banner.jpg',
+    alt:'Deposit $10, get $50 on Polymarket',
+    big:'Deposit $10<br>Get $50',
+    body:'Polymarket is where fight fans put real money behind their picks. Sign up through Home of Fight, deposit <b>$10</b>, and get <b>$50</b> to trade with.',
+    cta:'Claim My $50',
+    url:'https://app.polymarket.us/S8ac/FIGHT',
+    fine:'Offer provided by Polymarket. 18+ where legally permitted. Terms and eligibility apply — see Polymarket for full details.'
+  }
+];
+function openBonusScreen(){
+  const o = BONUS_OFFERS[Math.floor(Math.random()*BONUS_OFFERS.length)];
+  const img=document.getElementById('bonusBanner'); img.src=o.banner; img.alt=o.alt;
+  document.getElementById('bonusBig').innerHTML=o.big;
+  document.getElementById('bonusBody').innerHTML=o.body;
+  const c=document.getElementById('btn-claim'); c.textContent=o.cta; c.href=o.url;
+  document.getElementById('bonusFine').textContent=o.fine;
+  show('screen-bonus');
+}
+function openDiscordModal(){
+  const o = OFFERS[Math.floor(Math.random()*OFFERS.length)];
+  const img = document.getElementById('modalBanner');
+  img.src = o.banner; img.alt = o.alt;
+  const cta = document.getElementById('btn-discord');
+  cta.textContent = o.cta; cta.href = o.url;
+  document.getElementById('discordModal').classList.add('show');
+}
+function closeDiscordModal(){ document.getElementById('discordModal').classList.remove('show'); }
+// ---- Shareable results image (canvas) ----
+function loadImg(src){
+  return new Promise(res=>{
+    const im=new Image();
+    im.onload=()=>res(im); im.onerror=()=>res(null); im.src=src;
+  });
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+function octPath(ctx,cx,cy,s){ // octagon centered at cx,cy, size s (width)
+  const a=s/2, k=a*0.414; ctx.beginPath();
+  const pts=[[cx-k,cy-a],[cx+k,cy-a],[cx+a,cy-k],[cx+a,cy+k],[cx+k,cy+a],[cx-k,cy+a],[cx-a,cy+k],[cx-a,cy-k]];
+  pts.forEach((p,i)=> i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.closePath();
+}
+async function buildShareImage(){
+  // make sure display fonts are ready so the canvas doesn't fall back
+  try{ if(document.fonts && document.fonts.ready){
+    await Promise.all([document.fonts.load('400 150px Anton'), document.fonts.load('800 34px Inter'), document.fonts.load('700 34px Inter')]);
+    await document.fonts.ready;
+  }}catch(_){}
+  const W=1080, H=1350;
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const ctx=cv.getContext('2d');
+  // background
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+  let g=ctx.createRadialGradient(W/2,-120,60,W/2,-120,W*0.9);
+  g.addColorStop(0,'rgba(224,181,75,.20)'); g.addColorStop(1,'rgba(224,181,75,0)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  const goldGrad=ctx.createLinearGradient(0,0,0,60);
+  goldGrad.addColorStop(0,'#FDF3C8'); goldGrad.addColorStop(.5,'#E0B54B'); goldGrad.addColorStop(1,'#A87826');
+
+  const total=currentTotal(), ovr=Math.round(total/8);
+  const tier=TIERS.find(t=>total>=t.min);
+
+  // header: badge + wordmark
+  const badge=await loadImg('images/hof-badge.png');
+  if(badge){ const bs=88; ctx.drawImage(badge,(W-bs)/2,44,bs,bs); }
+  const wm=await loadImg('images/hof-wordmark.png');
+  if(wm){ const ww=260, wh=ww*(wm.height/wm.width); ctx.drawImage(wm,(W-ww)/2,144,ww,wh); }
+  ctx.textAlign='center';
+  ctx.fillStyle='#8A8F98'; ctx.font='800 19px Inter, sans-serif';
+  ctx.fillText('BUILD THE PERFECT MMA FIGHTER', W/2, 226);
+
+  // score
+  ctx.font="400 128px Anton, sans-serif";
+  ctx.fillStyle='#F6F3EC';
+  ctx.fillText(String(total), W/2 - 56, 366);
+  ctx.font="400 42px Anton, sans-serif"; ctx.fillStyle='#54585F';
+  ctx.fillText('/800', W/2 + (String(total).length*39)/2 + 18, 366);
+  // tier
+  ctx.font="400 56px Anton, sans-serif";
+  ctx.fillStyle='#E0B54B';
+  ctx.fillText(tier.name.toUpperCase(), W/2, 430);
+  ctx.fillStyle='#8A8F98'; ctx.font='800 22px Inter, sans-serif';
+  ctx.fillText(ovr+' OVERALL', W/2, 466);
+
+  // fighter rows
+  const rows=CATS.map(c=>({cat:c.label, ...build[c.key]}));
+  const startY=506, rowH=90, padX=64, rowW=W-padX*2;
+  const photos=await Promise.all(rows.map(r=>loadImg(imgPath(r.name))));
+  for(let i=0;i<rows.length;i++){
+    const r=rows[i], y=startY+i*rowH;
+    // divider
+    if(i>0){ ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(padX,y); ctx.lineTo(W-padX,y); ctx.stroke(); }
+    const cy=y+rowH/2, oct=64, ocx=padX+oct/2+6;
+    // octagon photo
+    ctx.save();
+    octPath(ctx,ocx,cy,oct+8); ctx.fillStyle=goldGrad; ctx.fill();
+    octPath(ctx,ocx,cy,oct);
+    ctx.fillStyle='#0e0e12'; ctx.fill(); ctx.clip();
+    const ph=photos[i];
+    if(ph){ const s=oct; ctx.drawImage(ph, ocx-s/2, cy-s/2, s, s); }
+    else { ctx.fillStyle='#43454A'; ctx.font='400 30px Anton, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+           ctx.fillText(initials(r.name), ocx, cy); ctx.textBaseline='alphabetic'; }
+    ctx.restore();
+    // cat + name
+    const tx=ocx+oct/2+26;
+    ctx.textAlign='left';
+    ctx.fillStyle='#E0B54B'; ctx.font='800 19px Inter, sans-serif';
+    ctx.fillText(r.cat.toUpperCase(), tx, cy-12);
+    ctx.fillStyle='#F6F3EC'; ctx.font='700 34px Inter, sans-serif';
+    let nm=r.name+(r.prime?'  \u2605PRIME':'');
+    ctx.fillText(nm, tx, cy+24);
+    // value
+    ctx.textAlign='right';
+    const v=r.value;
+    ctx.fillStyle = valColor(v);
+    ctx.font='400 52px Anton, sans-serif';
+    ctx.fillText(String(v), W-padX-6, cy+18);
+  }
+  // footer CTA
+  ctx.textAlign='center';
+  ctx.fillStyle='#F6F3EC'; ctx.font='800 32px Inter, sans-serif';
+  ctx.fillText('Think you can beat it?', W/2, H-78);
+  ctx.fillStyle=goldGrad; ctx.font='800 30px Inter, sans-serif';
+  ctx.fillText('homeoffight.com/trivia', W/2, H-38);
+
+  return new Promise(res=> cv.toBlob(b=>res(b),'image/png',0.95));
+}
+
+function shareText(){
+  const total=currentTotal(), ovr=Math.round(total/8);
+  const tier=TIERS.find(t=>total>=t.min);
+  return '\uD83E\uDD4A I scored '+total+'/800 ('+tier.name+') on Build the Perfect MMA Fighter!\n\n'
+       + 'Think you can beat it? \uD83D\uDC4A\nPlay at homeoffight.com/trivia';
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+document.querySelectorAll('.divbtn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    division = b.dataset.div;
+    document.querySelectorAll('.divbtn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+  });
+});
+document.getElementById('btn-home').addEventListener('click',()=>show('screen-start'));
+document.getElementById('btn-start').addEventListener('click',startGame);
+document.getElementById('btn-again').addEventListener('click',startGame);
+document.getElementById('btn-respin').addEventListener('click',respin);
+document.getElementById('btn-coach').addEventListener('click',openCoachPick);
+document.getElementById('btn-back').addEventListener('click',()=>show('screen-result'));
+document.getElementById('btn-modal-close').addEventListener('click',closeDiscordModal);
+document.getElementById('discordModal').addEventListener('click',e=>{ if(e.target.id==='discordModal') closeDiscordModal(); });
+document.getElementById('btn-share').addEventListener('click',async(e)=>{
+  const btn=e.currentTarget;
+  const orig=btn.textContent;
+  btn.textContent='Building image…'; btn.style.pointerEvents='none';
+  const txt=shareText();
+  let blob=null;
+  try{ blob=await buildShareImage(); }catch(_){ blob=null; }
+  btn.textContent=orig; btn.style.pointerEvents='';
+
+  // 1) Try native share WITH the image (best on mobile)
+  if(blob){
+    const file=new File([blob],'my-mma-fighter.png',{type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], text:txt}); return; }catch(err){ if(err && err.name==='AbortError') return; }
+    }
+  }
+  // 2) Native share text-only
+  if(navigator.share){
+    try{ await navigator.share({text:txt}); if(blob) downloadBlob(blob); return; }
+    catch(err){ if(err && err.name==='AbortError') return; }
+  }
+  // 3) Desktop / no share API: download image + copy caption
+  if(blob) downloadBlob(blob);
+  try{ await navigator.clipboard.writeText(txt); toast(blob?'Image saved · caption copied':'Caption copied'); }
+  catch(_){ toast(blob?'Image saved':'Could not share'); }
+});
+function downloadBlob(blob){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='my-mma-fighter.png';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+}
+</script>
+</body>
+</html>
