@@ -468,10 +468,17 @@ button.mystatus.need:hover{border-color:var(--loss)}
 #card-top{scroll-margin-top:80px}
 .mainlbl{color:var(--gold-ink);font-weight:800}
 /* share dialog */
-.sharewrap{background:#000;border-radius:12px;display:grid;place-items:center;padding:10px}
+.sharewrap{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;display:grid;place-items:center;padding:10px}
 .sharewrap img{max-height:58vh;width:auto;max-width:100%}
-.share-acts{display:flex;gap:10px;margin-top:14px}
-.share-acts .btn{flex:1}
+.share-acts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.shbtn{height:68px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-weight:700;font-size:13.5px;color:#fff;line-height:1.1}
+.shbtn svg{width:23px;height:23px}
+.sh-ig{background:linear-gradient(45deg,#f27a1a 0%,#d62976 42%,#962fbf 78%,#4f5bd5 100%)}
+.sh-x{background:#000}
+.sh-save{background:var(--surface);color:var(--ink);border:1px solid var(--line-2)}
+.sh-save:hover{border-color:var(--ink-2)}
+.shnote{margin:12px 0 0;text-align:center;font-size:14px;font-weight:600;color:var(--ink-2);min-height:20px}
+.shlink{display:block;margin:6px auto 0;font-size:13.5px;font-weight:700;color:var(--muted);text-decoration:underline;text-underline-offset:3px;padding:8px 10px}
 @media (max-width:560px){.hide-s{display:none}.lbgrid{--lead:176px;--cw:70px}.lg-lead{grid-template-columns:24px minmax(0,1fr) 26px;gap:6px;padding-left:10px}.lg-lead .av{display:none}.lg-lead .lwins{font-size:20px}}
 @media (min-width:760px){
   .hl-cut{height:250px}
@@ -559,7 +566,10 @@ const I = {
   season: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>',
   board: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V11M10 20V5M16 20v-6M22 20H2"/></svg>',
   rules: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
-  share: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13V3M6 7l4-4 4 4M4 11v5h12v-5"/></svg>'
+  share: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13V3M6 7l4-4 4 4M4 11v5h12v-5"/></svg>',
+  ig: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.65l-5.22-6.82-5.97 6.82H1.68l7.73-8.84L1.25 2.25h6.83l4.71 6.23zm-1.16 17.52h1.83L7.08 4.13H5.12z"/></svg>',
+  save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 17v3h16v-3"/></svg>'
 };
 const TOUCH = matchMedia('(pointer: coarse)').matches;
 const BUST = '<svg viewBox="0 0 200 240" aria-hidden="true"><defs><linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3326"/><stop offset="1" stop-color="#121110"/></linearGradient></defs><circle cx="100" cy="74" r="44" fill="url(#bg1)"/><path d="M14 240c0-64 38-108 86-108s86 44 86 108z" fill="url(#bg1)"/></svg>';
@@ -1804,9 +1814,10 @@ const canShareFiles = () => { try { return !!(navigator.canShare && navigator.ca
 async function shareCard() {
   const e = S.entry, ev = S.openEvent;
   const p = ev && pickFor(ev.id); if (!p || !S.me?.profile) return;
-  openDialog(`<h3 class="c">Share your pick</h3><p class="sub">Post it to your story and bring your friends in.</p>
+  openDialog(`<h3 class="c">Share your pick</h3><p class="sub">Post it and bring your friends in.</p>
     <div class="tabs2" id="shfmt">${[['story', 'Story'], ['post', 'Post']].map(([k, l]) => `<button data-act="sharefmt" data-f="${k}" aria-pressed="${SHARE.fmt === k}">${l}</button>`).join('')}</div>
-    <div class="sharewrap" id="shimg"><p style="color:#bbb;padding:40px 10px;margin:0">Making your graphic…</p></div><div class="share-acts" id="shacts"></div>`);
+    <div class="sharewrap" id="shimg"><p style="color:#bbb;padding:40px 10px;margin:0">Making your graphic…</p></div><div class="share-acts" id="shacts"></div>
+    <p class="shnote" id="shnote" role="status"></p><button class="shlink" data-act="sharelink">Copy the game link</button>`);
   const me = p.fighter || {};
   const src = [me.stance_left_url, me.stance_right_url, me.headshot_url].filter(Boolean);
   const [, logo, word, avatar] = await Promise.all([loadShareFonts(), loadImg(LOGO_MAIN, false), loadImg(LOGO_WORDMARK, false), exportableImg(S.me.profile.avatar_url)]);
@@ -1822,10 +1833,62 @@ function renderShare() {
   SHARE.url = drawShare(SHARE.fmt, SHARE.data).toDataURL('image/png');
   $('#shimg').innerHTML = `<img src="${SHARE.url}" alt="Your MMA Survivor pick">`;
   document.querySelectorAll('#shfmt button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.f === SHARE.fmt)));
-  $('#shacts').innerHTML = (canShareFiles() ? `<button class="btn btn-dark" data-act="sharego">${I.share} Share</button>` : '')
-    + (FORCE_DEMO ? '' : `<button class="btn ${canShareFiles() ? 'btn-ghost' : 'btn-dark'}" data-act="sharedl">Download</button>`)
-    + (TOUCH ? '' : '');
-  if (TOUCH && !canShareFiles()) $('#shacts').insertAdjacentHTML('afterend', '<p class="note" style="text-align:center">Or press and hold the image to save it.</p>');
+  $('#shacts').innerHTML = `<button class="shbtn sh-ig" data-act="shareto" data-to="ig">${I.ig}<span>Instagram</span></button>`
+    + `<button class="shbtn sh-x" data-act="shareto" data-to="x">${I.x}<span>X</span></button>`
+    + `<button class="shbtn sh-save" data-act="shareto" data-to="save">${I.save}<span>Save picture</span></button>`;
+  shareNote('');
+  // get the other size ready too, so every button works on the first tap
+  setTimeout(() => { if (SHARE.data) shareFile(SHARE.fmt === 'story' ? 'post' : 'story'); }, 60);
+}
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const SHARE_LINK = 'https://www.homeoffight.com/survivor';
+const shareText = () => { const d = SHARE.data || {}; return `My week ${d.week} pick in MMA Survivor: ${d.name || d.last}${d.streak > 0 ? `. ${d.streak} in a row 🔥` : ''}. One UFC pick a week, survive and win prizes. Play free 👉`; };
+function shareNote(t) { const n = $('#shnote'); if (n) n.textContent = t; }
+// the picture as a file, made without waiting so sharing still counts as part of the tap
+function shareFile(fmt) {
+  const d = SHARE.data;
+  if (!SHARE.cache || SHARE.cache.d !== d) SHARE.cache = { d };
+  if (!SHARE.cache[fmt]) {
+    const url = fmt === SHARE.fmt && SHARE.url ? SHARE.url : drawShare(fmt, d).toDataURL('image/png');
+    const bin = atob(url.split(',')[1]), u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    SHARE.cache[fmt] = { url, file: new File([u8], `mma-survivor-week${d.week}-${fmt}.png`, { type: 'image/png' }) };
+  }
+  return SHARE.cache[fmt];
+}
+const canShareThis = (data) => { try { return !!(navigator.share && navigator.canShare && navigator.canShare(data)); } catch (e) { return false; } };
+function saveFile(f) {
+  const a = document.createElement('a'), u = URL.createObjectURL(f.file);
+  a.href = u; a.download = f.file.name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(u), 8000);
+}
+function shareTo(to) {
+  if (!SHARE.data) return;
+  const f = shareFile(to === 'x' ? 'post' : SHARE.fmt);
+  const sheet = (data, note) => {
+    if (!canShareThis(data)) return false;
+    shareNote(note);
+    navigator.share(data).catch((err) => { shareNote(err?.name === 'AbortError' ? '' : 'Press and hold the picture above to save it.'); });
+    return true;
+  };
+  if (to === 'ig') {
+    if (TOUCH && sheet({ files: [f.file] }, `Pick Instagram, then ${SHARE.fmt === 'story' ? 'Story' : 'Post'}.`)) return;
+    saveFile(f); shareNote('Picture saved. Post it to Instagram from your phone, or open this page on your phone and tap Instagram.');
+    return;
+  }
+  if (to === 'x') {
+    if (TOUCH && sheet({ files: [f.file], text: `${shareText()} ${SHARE_LINK}` }, 'Pick X. Your picture, text and link are already in the post.')) return;
+    // on a computer: copy the picture, open a ready-made post with the text and link
+    const key = /Mac/.test(navigator.platform) ? '⌘' : 'Ctrl';
+    let copying = null;
+    try { if (navigator.clipboard?.write && window.ClipboardItem) copying = navigator.clipboard.write([new ClipboardItem({ 'image/png': f.file })]); } catch (e) { copying = null; }
+    window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(shareText())}&url=${encodeURIComponent(SHARE_LINK)}`, '_blank', 'noopener');
+    if (copying) { shareNote(`Your post is open on X. Paste the picture into it (${key}+V).`); copying.catch(() => { saveFile(f); shareNote('Your post is open on X. Add the picture we just saved to it.'); }); }
+    else { saveFile(f); shareNote('Your post is open on X. Add the picture we just saved to it.'); }
+    return;
+  }
+  if (IS_IOS && sheet({ files: [f.file] }, 'Tap Save Image to put it in your Photos.')) return;
+  saveFile(f); shareNote(TOUCH ? 'Saved. You will find it in your gallery or downloads.' : 'Saved to your downloads.');
 }
 const shareName = () => `mma-survivor-week${SHARE.data?.week || ''}-${SHARE.fmt}.png`;
 
@@ -1926,13 +1989,8 @@ async function act(el) {
     }
     else if (a === 'share') await shareCard();
     else if (a === 'sharefmt') { SHARE.fmt = el.dataset.f; store.set('hof-survivor-sharefmt', SHARE.fmt); renderShare(); }
-    else if (a === 'sharedl') { const l = document.createElement('a'); l.href = SHARE.url; l.download = shareName(); document.body.appendChild(l); l.click(); l.remove(); }
-    else if (a === 'sharego') {
-      try {
-        const blob = await (await fetch(SHARE.url)).blob();
-        await navigator.share({ files: [new File([blob], shareName(), { type: 'image/png' })], text: 'My MMA Survivor pick this week. Play free: https://www.homeoffight.com/survivor' });
-      } catch (err) { if (err?.name !== 'AbortError') toast("Couldn't open sharing. Use Download instead.", true); }
-    }
+    else if (a === 'shareto') shareTo(el.dataset.to);
+    else if (a === 'sharelink') { try { await navigator.clipboard.writeText(SHARE_LINK); shareNote('Link copied. Add it as a link sticker on your story.'); } catch (err) { shareNote(SHARE_LINK); } }
     else if (a === 'lbfilter') { S.lb.filter = el.dataset.f; await loadBoard(); render(); }
     else if (a === 'lbmore') { await loadBoard(true); render(); }
     else if (a === 'simulate') { api.simulate(); S.draft = null; S.viewEventId = null; await refresh({ season: true }); toast('Fight night simulated with random, odds-weighted results'); }
