@@ -1221,13 +1221,15 @@ function viewPick() {
 
   if (!ev) return h + `<div class="empty"><b>No card yet</b>The next UFC event shows up here once it's announced.</div>`;
   if (S.fightsFor !== ev.id) return h + `<div class="empty"><b>Loading card</b></div>`;
-  if (!fights.length) return h + `<div class="empty"><b>Card coming soon</b>Fights appear here automatically once they're announced.</div>`;
+  // cancelled bouts never show on the card (a pick on one is handled in the status box above)
+  const shown = fights.filter((f) => f.status !== 'canceled');
+  if (!shown.length) return h + `<div class="empty"><b>Card coming soon</b>Fights appear here automatically once they're announced.</div>`;
 
-  const main = fights.find((f) => f.match_no === 1) || fights.find((f) => /main event/i.test(f.note || '')) || fights[0];
+  const main = shown.find((f) => f.match_no === 1) || shown.find((f) => /main event/i.test(f.note || '')) || shown[0];
   h += headlinerHTML(main, ctx);
   // the list repeats the main event first, so nobody scrolls past it
   const segs = [];
-  [main, ...fights.filter((f) => f !== main)].forEach((f) => { let s = segs.find((x) => x.key === f.segment); if (!s) segs.push(s = { key: f.segment, label: f.segment_label, fights: [] }); s.fights.push(f); });
+  [main, ...shown.filter((f) => f !== main)].forEach((f) => { let s = segs.find((x) => x.key === f.segment); if (!s) segs.push(s = { key: f.segment, label: f.segment_label, fights: [] }); s.fights.push(f); });
   segs.forEach((s) => {
     const start = s.fights.reduce((m, f) => Math.min(m, Date.parse(f.lock_at)), Infinity);
     h += `<div class="seg"><h2 class="c">${esc(s.label || 'Card')}</h2><span>${Number.isFinite(start) ? esc(fmtTime(start)) : ''}</span></div><div class="fights">${s.fights.map((f) => fightHTML(f, ctx, f === main)).join('')}</div>`;
