@@ -415,6 +415,42 @@ button.lrow.me:hover{background:#f7ecc8}
 /* admin */
 .adm-note{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--gold-ink);background:var(--gold-tint);border-radius:999px;padding:4px 10px;margin-top:8px}
 .adm-note svg{width:13px;height:13px}
+.wkscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.wktab{border-collapse:separate;border-spacing:0;font-size:13.5px;min-width:100%;white-space:nowrap}
+.wktab th,.wktab td{padding:10px 10px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;font-weight:600}
+.wktab thead th{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding-top:4px}
+.wktab th:first-child{text-align:left;position:sticky;left:0;background:var(--surface);z-index:1;padding-left:0;box-shadow:1px 0 0 var(--line)}
+.wktab tbody tr{cursor:pointer}
+.wktab tbody tr:hover td,.wktab tbody tr:hover th{background:var(--surface-2)}
+.wktab tbody tr[aria-selected="true"] td,.wktab tbody tr[aria-selected="true"] th{background:var(--gold-tint)}
+.wktab .wkc b{display:block;font-size:14px;font-weight:800}
+.wktab .wkc small{display:block;color:var(--muted);font-weight:600;font-size:12px;max-width:150px;overflow:hidden;text-overflow:ellipsis}
+.wktab .w{color:var(--win)}.wktab .l{color:var(--loss)}.wktab .soft{color:var(--faint)}
+.wknote{font-size:12.5px;margin:10px 0 0!important;color:var(--muted)!important;line-height:1.5}
+.wkchips{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 14px;padding:0 16px 2px}
+.wkchips button{flex:none;height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);font-weight:700;font-size:13px;background:var(--surface)}
+.wkchips button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.mini{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media (min-width:560px){.mini{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:900px){.mini{grid-template-columns:repeat(4,1fr)}}
+.mini div{background:var(--surface-2);border-radius:10px;padding:11px 12px}
+.mini b{display:block;font-size:24px;line-height:1.05;font-weight:800}
+.mini small{display:block;margin-top:5px;font-size:12px;color:var(--muted);font-weight:600;line-height:1.3}
+.mini .w b{color:var(--win)}.mini .l b{color:var(--loss)}
+.sub3{font-size:14px;font-weight:800;margin:18px 0 10px}
+.srow.ladder{grid-template-columns:28px minmax(0,1fr) 64px}
+.srow .lw{font-weight:800;text-align:center}
+.bar2.red i{background:var(--loss)!important}.bar2.green i{background:var(--win)!important}
+.fbrk{display:grid;gap:12px}
+.fb{display:grid;grid-template-columns:28px minmax(0,1fr) auto 78px;gap:4px 10px;align-items:center}
+.fb .t b{display:block;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fb .t small{display:block;font-size:12px;color:var(--muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fb .n{text-align:right;line-height:1.1}.fb .n b{display:block;font-size:15px}.fb .n small{font-size:11.5px;color:var(--muted);font-weight:700}
+.fb .bar2{grid-column:2/5;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}
+.fb .bar2 i{display:block;height:100%;background:var(--gold)}
+.rbadge{justify-self:end;font-size:11px;font-weight:800;border-radius:999px;padding:4px 9px;text-transform:uppercase;letter-spacing:.03em;background:var(--surface-2);color:var(--muted)}
+.rbadge.won{background:var(--win-tint);color:var(--win)}.rbadge.lost,.rbadge.draw,.rbadge.cancelled{background:var(--loss-tint);color:var(--loss)}.rbadge.live{background:var(--loss-tint);color:var(--live)}
+
 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
 .tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .tile b{display:block;font-size:28px;line-height:1}
@@ -769,6 +805,18 @@ function SupabaseAPI() {
     async player(userId, seasonId) { return chk(await sb.rpc('player_profile', { p_user: userId, p_season: seasonId })); },
     async adminOverview(seasonId) { return chk(await sb.rpc('admin_overview', { p_season: seasonId })); },
     async adminPlayers(seasonId) { return chk(await sb.rpc('admin_players', { p_season: seasonId })); },
+    async adminData(seasonId) {
+      const all = async (q) => { const out = []; for (let from = 0; ; from += 1000) { const r = chk(await q().range(from, from + 999)); out.push(...r); if (r.length < 1000) return out; } };
+      const events = chk(await sb.from('events').select('id,name,short_name,starts_at,week_no,status').eq('season_id', seasonId).order('week_no'));
+      const ids = events.map((e) => e.id);
+      const [fights, entries, profiles, picks] = await Promise.all([
+        ids.length ? all(() => sb.from('fight_cards').select('id,event_id,fighter_a,fighter_b,status,winner,a_odds,b_odds,a,b').in('event_id', ids).order('id')) : [],
+        all(() => sb.from('entries').select('id,user_id,entry_no,start_week,status,wins,out_week,out_reason').eq('season_id', seasonId).order('id')),
+        all(() => sb.from('profiles').select('id,created_at').order('id')),
+        Promise.all(ids.map((id) => all(() => sb.from('picks').select('id,entry_id,event_id,fight_id,fighter_id,result,pick_pct').eq('event_id', id).order('id')))).then((a) => a.flat())
+      ]);
+      return { events, fights, entries, profiles, picks };
+    },
     async join() { return chk(await sb.rpc('create_entry')); },
     async makePick(entryId, fightId, fighterId) { return chk(await sb.rpc('make_pick', { p_entry: entryId, p_fight: fightId, p_fighter: fighterId })); }
   };
@@ -993,6 +1041,11 @@ function DemoAPI() {
           picked_at: p ? '2026-10-15T18:00:00Z' : null, followers: followersOf(u.id) + (st.follows.includes(u.id) ? 1 : 0) };
       }).sort((a, b) => (b.best ?? -1) - (a.best ?? -1)));
     },
+    async adminData() {
+      const evs = events(), t0 = Date.parse(evs[0].starts_at) - 5 * 864e5;
+      const profiles = [...st.users.map((u, i) => ({ id: u.id, created_at: new Date(t0 + i * 3600e3).toISOString() })), ...(st.me?.profile ? [{ id: 'me', created_at: new Date(now()).toISOString() }] : [])];
+      return delay({ events: evs, fights: evs.flatMap((e) => fightsOf(e.id)), entries: st.entries.map((e) => ({ ...e })), profiles, picks: st.picks.map((p) => ({ ...p })) });
+    },
     adminView() { return !!st.adminView; },
     toggleAdmin() { st.adminView = !st.adminView; save(); return st.adminView; },
     async join() {
@@ -1046,7 +1099,7 @@ const S = {
   draft: null, tape: {}, popular: {}, photo: undefined,
   lb: { filter: 'all', q: '', rows: [], total: 0, offset: 0, picks: {} }, myRank: null, top: [], stats: null,
   socials: null, isAdmin: false, following: new Set(), followRows: [], player: null,
-  admin: { ov: null, players: [], q: '', filter: 'all', limit: 100, allSplit: false },
+  admin: { ov: null, players: [], q: '', filter: 'all', limit: 100, allSplit: false, stats: null, statsAt: 0, statsErr: null, statsBusy: null, week: null, allF: false },
   loading: true, error: null
 };
 const viewEvent = () => S.events.find((e) => e.id === S.viewEventId) || null;
@@ -1110,10 +1163,23 @@ async function loadFollowRows() {
   if (!S.me?.profile || !S.season || !S.following.size) { S.followRows = []; return; }
   S.followRows = (await api.leaderboard(S.season.id, { filter: 'following', offset: 0, limit: 100, ids: [...S.following] })).rows;
 }
-async function loadAdmin() {
+async function loadAdmin(force = false) {
   if (!S.isAdmin || !S.season) return;
   const [ov, players] = await Promise.all([api.adminOverview(S.season.id), api.adminPlayers(S.season.id)]);
   S.admin.ov = ov; S.admin.players = players || [];
+  if (force || !S.admin.stats || Date.now() - S.admin.statsAt > 120e3) {
+    const job = loadAdminStats();
+    if (force || !S.admin.stats) await job;
+    else job.then(() => { if (S.tab === 'admin' && document.activeElement?.id !== 'adsearch') render(); });
+  }
+}
+async function loadAdminStats() {
+  if (S.admin.statsBusy) return S.admin.statsBusy;
+  return (S.admin.statsBusy = (async () => {
+    try { S.admin.stats = adminStats(await api.adminData(S.season.id)); S.admin.statsAt = Date.now(); S.admin.statsErr = null; }
+    catch (e) { S.admin.statsErr = e.message || 'unknown error'; }
+    finally { S.admin.statsBusy = null; }
+  })());
 }
 async function loadTab() {
   if (S.tab === 'admin' && !S.isAdmin) S.tab = 'pick';
@@ -1499,12 +1565,7 @@ function viewAdmin() {
   const tiles = [[ov.profiles, 'Players', ov.new_24h ? `+${ov.new_24h} today` : ''], [ov.alive, 'On a streak'], [ov.out, 'Streak ended', ov.restarts ? `${ov.restarts} restarted` : ''],
     [ov.picks_made, ev ? `Picks for week ${ev.week_no}` : 'Picks'], [ov.need_pick, 'Still need to pick', '', ov.need_pick > 0 && ev && !ev.locked ? 'warn' : ''], [ov.phones ?? 0, 'Phone numbers', ov.with_socials ? `${ov.with_socials} added IG or X` : '']];
   h += `<div class="tiles">${tiles.map(([n, l, sub, cls]) => `<div class="tile ${cls || ''}"><b class="c tnum">${Number(n || 0).toLocaleString()}</b><small>${esc(l)}${sub ? ` · ${esc(sub)}` : ''}</small></div>`).join('')}</div>`;
-  if (ev) {
-    const split = ov.split || [], showAll = S.admin.allSplit || split.length <= 7;
-    h += `<div class="box"><h3 class="c">Week ${ev.week_no} picks</h3><p class="muted" style="margin:-6px 0 14px;font-size:13px">${ev.locked ? 'The card has started, so everyone can see picks now.' : 'Hidden from players until the card starts.'}</p>`;
-    h += split.length ? `<div class="split">${(showAll ? split : split.slice(0, 6)).map((x) => `<div class="srow">${avatarHTML(x.headshot_url, x.name, 's')}<span>${esc(x.name)} <span class="muted">· ${Number(x.picks).toLocaleString()}</span></span><span class="tnum" style="text-align:right">${Number(x.pct)}%</span><span class="bar2"><i style="width:${Math.min(100, Number(x.pct))}%"></i></span></div>`).join('')}</div>${showAll ? '' : `<div style="margin-top:12px"><button class="link" data-act="adsplit">Show all ${split.length} fighters picked</button></div>`}` : '<p>No picks yet this week.</p>';
-    h += `</div>`;
-  }
+  h += adminWeeksHTML();
   const f = S.admin.filter, qq = S.admin.q.toLowerCase();
   let rows = S.admin.players.filter((r) => f === 'nopick' ? (r.status === 'alive' && !r.pick_fighter && (r.start_week ?? 99) <= (ev?.week_no ?? 0)) : f === 'out' ? r.status === 'out' : true);
   if (qq) rows = rows.filter((r) => [r.username, r.email, r.instagram, r.x_handle, r.phone].some((v) => String(v || '').toLowerCase().includes(qq)));
@@ -1531,6 +1592,148 @@ function adminCSV() {
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
   const a = document.createElement('a'); a.href = url; a.download = `mma-survivor-players-${new Date().toISOString().slice(0, 10)}.csv`;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+
+// Week-by-week numbers for the admin tab, worked out in the browser from the season's raw rows
+function adminStats(d) {
+  const evs = (d.events || []).filter((e) => e.week_no != null).sort((a, b) => a.week_no - b.week_no);
+  const evById = Object.fromEntries(evs.map((e) => [e.id, e]));
+  const fightById = Object.fromEntries((d.fights || []).map((f) => [f.id, f]));
+  const entries = d.entries || [], entryById = Object.fromEntries(entries.map((e) => [e.id, e]));
+  const picks = (d.picks || []).filter((p) => evById[p.event_id] && entryById[p.entry_id]);
+  const userOf = (p) => entryById[p.entry_id].user_id, weekOf = (p) => evById[p.event_id].week_no;
+  const byEvent = {}; picks.forEach((p) => (byEvent[p.event_id] = byEvent[p.event_id] || []).push(p));
+  const hasPick = new Set(picks.map((p) => p.entry_id));
+  const firstPick = {}; picks.forEach((p) => { const u = userOf(p), w = weekOf(p); if (!(firstPick[u] <= w)) firstPick[u] = w; });
+  // each new account counts toward the first card that starts after it was made
+  const starts = evs.map((e) => Date.parse(e.starts_at)), suWeek = {};
+  (d.profiles || []).forEach((p) => { const t = Date.parse(p.created_at), i = starts.findIndex((s) => t <= s); const w = i < 0 ? null : evs[i].week_no; if (w != null) (suWeek[w] = suWeek[w] || []).push(p.id); });
+  const open = evs.find((e) => e.status !== 'final' && e.status !== 'canceled');
+  const lastWeek = open ? open.week_no : evs.length ? evs[evs.length - 1].week_no : 0;
+  const fInfo = (f, id) => (f ? (f.a?.id === id || f.fighter_a === id ? { me: f.a, opp: f.b, mine: [f.a_odds, f.b_odds] } : { me: f.b, opp: f.a, mine: [f.b_odds, f.a_odds] }) : { me: null, opp: null, mine: [null, null] });
+  const weeks = evs.filter((e) => e.week_no <= lastWeek || byEvent[e.id]).map((ev) => {
+    const w = ev.week_no, P = byEvent[ev.id] || [], final = ev.status === 'final';
+    const picked = new Set(P.map((p) => p.entry_id)), pickedUsers = new Set(P.map(userOf));
+    let fresh = 0, back = 0, kept = 0;
+    P.forEach((p) => { const e = entryById[p.entry_id]; if (e.start_week < w) kept++; else if (firstPick[e.user_id] === w) fresh++; else back++; });
+    const cameIn = entries.filter((e) => e.start_week < w && (e.out_week == null || e.out_week >= w));
+    const skippedE = cameIn.filter((e) => !picked.has(e.id)), skippedU = new Set(skippedE.map((e) => e.user_id));
+    const satOut = Object.keys(firstPick).filter((u) => firstPick[u] < w && !pickedUsers.has(u) && !skippedU.has(u)).length;
+    const n = (r) => P.filter((p) => p.result === r).length;
+    const won = n('win'), lost = n('loss'), push = n('push'), pending = n('pending');
+    const why = { lost: 0, draw: 0, cancelled: 0 };
+    P.forEach((p) => { if (p.result !== 'loss') return; const f = fightById[p.fight_id]; if (f?.status === 'canceled') why.cancelled++; else if (f && !f.winner) why.draw++; else why.lost++; });
+    const pcts = P.map((p) => p.pick_pct).filter(Number.isFinite);
+    const su = suWeek[w] || [], suPlayed = su.filter((u) => pickedUsers.has(u)).length;
+    const fm = {};
+    P.forEach((p) => {
+      const x = fm[p.fighter_id] = fm[p.fighter_id] || { id: p.fighter_id, fight: fightById[p.fight_id], picks: 0, fresh: 0, pcts: [] };
+      x.picks++; if (Number.isFinite(p.pick_pct)) x.pcts.push(p.pick_pct);
+      if (entryById[p.entry_id].start_week >= w && firstPick[userOf(p)] === w) x.fresh++;
+    });
+    const fighters = Object.values(fm).map((x) => {
+      const f = x.fight, info = fInfo(f, x.id), chance = winPct(info.mine[0], info.mine[1]) ?? (x.pcts.length ? Math.round(x.pcts.reduce((a, b) => a + b, 0) / x.pcts.length) : null);
+      const result = !f ? 'pending' : f.status === 'canceled' ? 'cancelled' : f.status === 'final' ? (f.winner === x.id ? 'won' : f.winner ? 'lost' : 'draw') : f.status === 'live' ? 'live' : 'pending';
+      return { id: x.id, name: info.me?.name || 'Unknown fighter', last: info.me?.last_name || '', headshot: info.me?.headshot_url || null, opp: info.opp?.name || '', chance, picks: x.picks, fresh: x.fresh, share: P.length ? Math.round(1000 * x.picks / P.length) / 10 : 0, result };
+    }).sort((a, b) => b.picks - a.picks);
+    return {
+      week: w, id: ev.id, name: ev.name, short: ev.short_name, starts_at: ev.starts_at, status: ev.status, final,
+      played: P.length, fresh, back, kept, cameIn: cameIn.length, skipped: skippedE.length, satOut,
+      won, lost, push, pending, why, eliminated: final ? lost + skippedE.length : null, aliveAfter: final ? won + push : null,
+      winRate: won + lost ? Math.round(100 * won / (won + lost)) : null,
+      dogPicks: P.filter((p) => p.pick_pct != null && p.pick_pct < 50).length, dogWins: P.filter((p) => p.result === 'win' && p.pick_pct != null && p.pick_pct < 50).length,
+      avgPct: pcts.length ? Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null,
+      signups: su.length, suPlayed, fighters
+    };
+  });
+  // the whole season so far
+  const users = Object.keys(firstPick), best = {};
+  entries.forEach((e) => { best[e.user_id] = Math.max(best[e.user_id] || 0, e.wins || 0); });
+  const W = picks.filter((p) => p.result === 'win').length, L = picks.filter((p) => p.result === 'loss').length;
+  const done = weeks.filter((x) => x.final);
+  const ladder = {}; entries.filter((e) => e.status === 'alive' && hasPick.has(e.id)).forEach((e) => { ladder[e.wins] = (ladder[e.wins] || 0) + 1; });
+  return {
+    weeks, open: open?.week_no ?? null,
+    season: {
+      playedEver: users.length, picks: picks.length, winRate: W + L ? Math.round(100 * W / (W + L)) : null,
+      restarts: entries.filter((e) => e.entry_no > 1 && hasPick.has(e.id)).length,
+      best: Math.max(0, ...Object.values(best)), avgPlayed: done.length ? Math.round(done.reduce((a, x) => a + x.played, 0) / done.length) : null
+    },
+    ladder: Object.entries(ladder).map(([k, v]) => [Number(k), v]).sort((a, b) => b[0] - a[0]),
+    milestones: [3, 5, 10, 15, 20].map((m) => [m, Object.values(best).filter((b) => b >= m).length])
+  };
+}
+const fmtN = (v) => (v == null ? '–' : Number(v).toLocaleString());
+function adminWeeksHTML() {
+  const A = S.admin.stats;
+  if (S.admin.statsErr && !A) return `<div class="box"><h3 class="c">Week by week</h3><p>Couldn't load the weekly numbers (${esc(S.admin.statsErr)}). <button class="link" data-act="adrefresh">Try again</button></p></div>`;
+  if (!A) return `<div class="box"><h3 class="c">Week by week</h3><p class="muted">Adding up every week…</p></div>`;
+  if (!A.weeks.length) return `<div class="box"><h3 class="c">Week by week</h3><p>No weeks played yet.</p></div>`;
+  const s = A.season, sel = A.weeks.find((x) => x.week === S.admin.week) || A.weeks.find((x) => x.week === A.open && x.played) || [...A.weeks].reverse().find((x) => x.played) || A.weeks[A.weeks.length - 1];
+  let h = `<div class="box"><h3 class="c">Season so far</h3><div class="mini">${[
+    [s.playedEver, 'Played at least once'], [s.picks, 'Picks made'], [s.winRate != null ? s.winRate + '%' : '–', 'Picks that won'],
+    [s.restarts, 'Came back after a loss'], [s.best, 'Best streak'], [s.avgPlayed, 'Players a week (avg)']
+  ].map(([v, l]) => `<div><b class="tnum">${typeof v === 'string' ? v : fmtN(v)}</b><small>${l}</small></div>`).join('')}</div></div>`;
+  // the table: one row per week, latest first
+  const cols = [['Played', (x) => x.played], ['New', (x) => x.fresh], ['Back', (x) => x.back], ['Won', (x) => (x.final || x.won ? x.won : null), 'w'], ['Lost', (x) => (x.final || x.lost ? x.lost : null), 'l'],
+    ['Skipped', (x) => x.skipped, '', (x) => !x.final], ['Sat out', (x) => x.satOut, '', (x) => !x.final], ['Alive after', (x) => x.aliveAfter], ['Won %', (x) => (x.winRate != null ? x.winRate + '%' : null)], ['Sign-ups', (x) => x.signups]];
+  h += `<div class="box"><h3 class="c">Week by week <small>Tap a week for details</small></h3><div class="wkscroll"><table class="wktab"><thead><tr><th>Week</th>${cols.map((c) => `<th>${c[0]}</th>`).join('')}</tr></thead><tbody>${[...A.weeks].reverse().map((x) => {
+    const t = eventTitle({ name: x.name, short_name: x.short });
+    return `<tr data-act="adweek" data-w="${x.week}" aria-selected="${x === sel}"><th class="wkc"><b>Week ${x.week}${x.final ? '' : x.status === 'live' ? ' · live' : ' · open'}</b><small>${esc(t.main || x.name)}</small></th>${cols.map(([, f, cls, soft]) => { const v = f(x); return `<td class="${cls || ''} ${soft && soft(x) ? 'soft' : ''}">${v == null ? '–' : typeof v === 'string' ? v : fmtN(v)}</td>`; }).join('')}</tr>`;
+  }).join('')}</tbody></table></div>
+  <p class="muted wknote"><b>New</b> first ever pick. <b>Back</b> started a new streak after losing. <b>Skipped</b> was on a streak but made no pick, so it ended${A.open ? ` (this week: still need to pick)` : ''}. <b>Sat out</b> played before, not this week.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">${FORCE_DEMO ? '' : '<button class="btn btn-ghost btn-sm" data-act="adwkcsv">Weeks CSV</button><button class="btn btn-ghost btn-sm" data-act="adfcsv">Fighters CSV</button>'}</div></div>`;
+  h += adminWeekHTML(sel, A);
+  // streak ladder right now
+  if (A.ladder.length) {
+    const max = Math.max(...A.ladder.map((x) => x[1]));
+    h += `<div class="box"><h3 class="c">Streaks right now</h3><div class="split">${A.ladder.map(([w, c]) => `<div class="srow ladder"><span class="tnum lw">${w}</span><span>${w ? `${plural(w, 'win')} in a row` : 'Waiting on first result'}</span><span class="tnum" style="text-align:right">${fmtN(c)}</span><span class="bar2"><i style="width:${Math.max(2, 100 * c / max)}%"></i></span></div>`).join('')}</div>
+      <div class="sub3">Hit a streak this season</div><div class="mini">${A.milestones.map(([m, c]) => `<div><b class="tnum">${fmtN(c)}</b><small>${m} in a row</small></div>`).join('')}</div></div>`;
+  }
+  return h;
+}
+function adminWeekHTML(x, A) {
+  const t = eventTitle({ name: x.name, short_name: x.short }), openWk = !x.final;
+  let h = `<div class="box" id="adweek"><div class="wkchips" role="group" aria-label="Week">${A.weeks.map((y) => `<button data-act="adweek" data-w="${y.week}" aria-pressed="${y === x}">Week ${y.week}</button>`).join('')}</div>
+    <h3 class="c">Week ${x.week} <small>${esc(fmtDay(x.starts_at))}${openWk ? (x.status === 'live' ? ' · live' : ' · picks open') : ' · final'}</small></h3><p class="muted" style="margin:-6px 0 12px;font-size:13px">${esc(t.main || x.name)}</p>`;
+  const tiles = [
+    [x.played, 'Played'], [x.fresh, 'New players'], [x.back, 'Came back after a loss'], [x.kept, `Kept their streak going${x.cameIn ? ` (of ${fmtN(x.cameIn)})` : ''}`],
+    [x.won, 'Won', 'w', openWk && !x.won], [x.lost, 'Lost', 'l', openWk && !x.lost], [x.skipped, openWk ? 'Still need to pick' : 'Skipped (streak ended)', 'l'], [x.satOut, openWk ? 'Lost before, not back yet' : 'Sat out'],
+    [x.aliveAfter, 'Alive after the week'], [x.winRate != null ? x.winRate + '%' : null, 'Picks that won'], [x.signups, `New sign-ups${x.signups ? ` (${fmtN(x.suPlayed)} picked)` : ''}`],
+    [x.dogPicks, `Underdog picks${x.dogPicks ? ` (${fmtN(x.dogWins)} won)` : ''}`], [x.avgPct != null ? x.avgPct + '%' : null, 'Avg chance of the pick'], [x.pending, 'Still to be decided', '', !x.pending]
+  ].filter((r) => !(r[3]));
+  h += `<div class="mini">${tiles.map(([v, l, cls]) => `<div class="${cls || ''}"><b class="tnum">${v == null ? '–' : typeof v === 'string' ? v : fmtN(v)}</b><small>${esc(l)}</small></div>`).join('')}</div>`;
+  const ended = [[x.why.lost, 'Their fighter lost'], [x.why.draw, 'Draw or no contest'], [x.why.cancelled, 'Bout cancelled'], [x.final ? x.skipped : 0, 'No pick']].filter((r) => r[0]);
+  if (ended.length) {
+    const tot = ended.reduce((a, r) => a + r[0], 0);
+    h += `<div class="sub3">How streaks ended (${fmtN(tot)})</div><div class="split">${ended.map(([c, l]) => `<div class="srow ladder"><span></span><span>${l}</span><span class="tnum" style="text-align:right">${fmtN(c)}</span><span class="bar2 red"><i style="width:${Math.max(2, 100 * c / tot)}%"></i></span></div>`).join('')}</div>`;
+  }
+  if (x.fighters.length) {
+    const all = S.admin.allF || x.fighters.length <= 12, list = all ? x.fighters : x.fighters.slice(0, 10);
+    const lbl = { won: 'Won', lost: 'Lost', draw: 'Draw', cancelled: 'Cancelled', live: 'Live', pending: 'Pending' };
+    h += `<div class="sub3">Picks by fighter (${x.fighters.length})</div><div class="fbrk">${list.map((f) => `<div class="fb">${avatarHTML(f.headshot, f.name, 's')}
+      <span class="t"><b>${esc(f.name)}</b><small>${f.opp ? `vs ${esc(f.opp)}` : ''}${f.chance != null ? ` · ${f.chance}% to win` : ''}${f.fresh ? ` · ${fmtN(f.fresh)} new` : ''}</small></span>
+      <span class="n tnum"><b>${fmtN(f.picks)}</b><small>${f.share}%</small></span><span class="rbadge ${f.result}">${lbl[f.result]}</span>
+      <span class="bar2 ${f.result === 'lost' || f.result === 'draw' || f.result === 'cancelled' ? 'red' : f.result === 'won' ? 'green' : ''}"><i style="width:${Math.max(1, f.share)}%"></i></span></div>`).join('')}</div>
+      ${all ? '' : `<div style="margin-top:12px"><button class="link" data-act="adallf">Show all ${x.fighters.length} fighters</button></div>`}`;
+  } else h += `<p style="margin-top:12px">No picks for this week yet.</p>`;
+  return h + `</div>`;
+}
+function downloadCSV(name, rows) {
+  const cell = (v) => { let s = v == null ? '' : String(v); if (/^[=+\-@]/.test(s)) s = "'" + s; return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  const url = URL.createObjectURL(new Blob([rows.map((r) => r.map(cell).join(',')).join('\n')], { type: 'text/csv' }));
+  const a = document.createElement('a'); a.href = url; a.download = `${name}-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+function adminWeeksCSV() {
+  const W = S.admin.stats?.weeks || [];
+  downloadCSV('mma-survivor-weeks', [['week', 'event', 'date', 'status', 'played', 'new_players', 'came_back', 'kept_streak', 'on_streak_coming_in', 'won', 'lost', 'lost_fighter', 'lost_draw_nc', 'lost_cancelled', 'skipped', 'sat_out', 'eliminated', 'alive_after', 'win_rate', 'signups', 'signups_who_picked', 'underdog_picks', 'underdog_wins', 'avg_chance', 'pending'],
+    ...W.map((x) => [x.week, x.name, String(x.starts_at || '').slice(0, 10), x.status, x.played, x.fresh, x.back, x.kept, x.cameIn, x.won, x.lost, x.why.lost, x.why.draw, x.why.cancelled, x.skipped, x.satOut, x.eliminated, x.aliveAfter, x.winRate, x.signups, x.suPlayed, x.dogPicks, x.dogWins, x.avgPct, x.pending])]);
+}
+function adminFightersCSV() {
+  const W = S.admin.stats?.weeks || [];
+  downloadCSV('mma-survivor-fighters', [['week', 'event', 'fighter', 'opponent', 'chance_to_win', 'picks', 'share_pct', 'new_players', 'result'],
+    ...W.flatMap((x) => x.fighters.map((f) => [x.week, x.name, f.name, f.opp, f.chance, f.picks, f.share, f.fresh, f.result]))]);
 }
 
 /* ---------- RULES ---------- */
@@ -1910,7 +2113,11 @@ async function act(el) {
     else if (a === 'adfilter') { S.admin.filter = el.dataset.f; S.admin.limit = 100; render(); }
     else if (a === 'adsplit') { S.admin.allSplit = true; render(); }
     else if (a === 'admore') { S.admin.limit += 100; render(); }
-    else if (a === 'adrefresh') { await loadAdmin(); render(); toast('Admin data refreshed'); }
+    else if (a === 'adrefresh') { await loadAdmin(true); render(); toast('Admin data refreshed'); }
+    else if (a === 'adweek') { S.admin.week = Number(el.dataset.w); S.admin.allF = false; render(); if (el.tagName === 'TR') $('#adweek')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    else if (a === 'adallf') { S.admin.allF = true; render(); }
+    else if (a === 'adwkcsv') adminWeeksCSV();
+    else if (a === 'adfcsv') adminFightersCSV();
     else if (a === 'adcsv') adminCSV();
     else if (a === 'demoadmin') {
       if (!S.me?.profile) { toast('Sign up in the demo first, then switch on admin view', true); return; }
@@ -1974,8 +2181,8 @@ async function act(el) {
     else if (a === 'shareto') shareTo(el.dataset.to);
     else if (a === 'lbfilter') { S.lb.filter = el.dataset.f; await loadBoard(); render(); }
     else if (a === 'lbmore') { await loadBoard(true); render(); }
-    else if (a === 'simulate') { api.simulate(); S.draft = null; S.viewEventId = null; await refresh({ season: true }); toast('Fight night simulated with random, odds-weighted results'); }
-    else if (a === 'resetdemo') { api.reset(); S.draft = null; S.viewEventId = null; await refresh({ season: true }); toast('Demo reset'); }
+    else if (a === 'simulate') { api.simulate(); S.admin.stats = null; S.draft = null; S.viewEventId = null; await refresh({ season: true }); toast('Fight night simulated with random, odds-weighted results'); }
+    else if (a === 'resetdemo') { api.reset(); S.admin.stats = null; S.draft = null; S.viewEventId = null; await refresh({ season: true }); toast('Demo reset'); }
   } catch (err) { toast(err.message || String(err), true); }
 }
 document.addEventListener('click', (e) => {
