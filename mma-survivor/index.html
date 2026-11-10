@@ -544,6 +544,7 @@ button.mystatus.need:hover{border-color:var(--loss)}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
+<style id="hof-rules">.hofrules .h2{margin:30px 0 10px}.hofrules .prizes{margin:12px 0 0}.hofrules .rp{margin:0 0 12px;color:var(--ink-2);font-weight:500;line-height:1.5;max-width:68ch}.hofrules .rp.small{margin-top:24px;font-size:13px;color:var(--muted)}.hofrules .rules + .prizes,.hofrules .prizes + .rules{margin-top:12px}</style>
 </head>
 <body>
 <header class="bar">
@@ -558,7 +559,7 @@ button.mystatus.need:hover{border-color:var(--loss)}
 <div class="demo-wrap"><div class="demo" id="demobar" hidden></div></div>
 <div class="page">
   <main class="main" id="view"></main>
-  <aside class="aside" id="aside" aria-label="Your season"></aside>
+  <aside class="aside" id="aside" aria-label="Your streak"></aside>
 </div>
 
 <!-- Ad container for Playwire (left empty on purpose) -->
@@ -1114,10 +1115,11 @@ function computeOpen() {
   if (!S.viewEventId || !S.events.some((e) => e.id === S.viewEventId)) S.viewEventId = S.openEvent?.id || null;
 }
 
+/* hof-prizes (sitebuild2/game_rules.py) */ const HOF_PRIZES = [{"wins": 5, "title": "5 in a row", "prize": "Store credit for UFC cards ($25)"}, {"wins": 10, "title": "10 in a row", "prize": "PSA-graded UFC card ($60)"}, {"wins": 15, "title": "15 in a row", "prize": "PSA-graded UFC card ($150)"}, {"wins": 20, "title": "20 in a row", "prize": "Credit on Novig ($250)"}, {"wins": 25, "title": "25 in a row", "prize": "One year of HOF Picks, free ($990)"}, {"wins": 30, "title": "30 in a row", "prize": "Signed memorabilia bundle ($1,500)"}, {"wins": 35, "title": "35 in a row", "prize": "Signed memorabilia bundle ($1,500)"}, {"wins": 40, "title": "40 in a row", "prize": "Deal or No Deal: 2 UFC tickets"}, {"wins": 45, "title": "45 in a row", "prize": "Deal or No Deal: 2 UFC tickets + hotel covered"}, {"wins": 50, "title": "50 in a row", "prize": "Deal or No Deal: $5,000"}, {"wins": 55, "title": "55 in a row", "prize": "Deal or No Deal: $10,000"}, {"wins": 60, "title": "60 in a row", "prize": "Deal or No Deal: 2027 Tesla Model 3"}, {"wins": 65, "title": "65 in a row", "prize": "Deal or No Deal: 2027 Tesla Model Y"}, {"wins": 70, "title": "70 in a row", "prize": "Deal or No Deal: 2027 Tesla Cybertruck"}];
 async function loadSeason() {
   const r = await api.season();
   if (!r) { S.season = null; return; }
-  Object.assign(S, { season: r.season, prizes: r.prizes, events: r.events });
+  Object.assign(S, { season: r.season, prizes: HOF_PRIZES, events: r.events });
   computeOpen();
 }
 async function loadFights() {
@@ -1204,7 +1206,7 @@ async function refresh({ season = false, quiet = false } = {}) {
 /* =====================================================================
    RENDER
    ===================================================================== */
-const TABS = [['pick', 'Picks', 'Picks', 'picks'], ['season', 'My season', 'Season', 'season'], ['board', 'Leaderboard', 'Leaders', 'board'], ['rules', 'Rules', 'Rules', 'rules']];
+const TABS = [['pick', 'Picks', 'Picks', 'picks'], ['season', 'My streak', 'Streak', 'season'], ['board', 'Leaderboard', 'Leaders', 'board'], ['rules', 'Rules', 'Rules', 'rules']];
 function needsPick() {
   if (!(S.me?.profile && S.openEvent && S.openEvent.status !== 'final' && S.fightsFor === S.openEvent.id && S.fights.length && !S.locked)) return false;
   const e = S.entry;
@@ -1224,7 +1226,7 @@ function render() {
     : `<button class="btn btn-gold btn-sm" data-act="${S.me ? 'profile' : 'auth'}" data-mode="in">${S.me ? 'Finish profile' : 'Log in'}</button>`;
   const v = $('#view');
   if (S.loading) v.innerHTML = `<div class="empty"><b>Loading this week's card</b></div>`;
-  else if (!S.season) v.innerHTML = `<div class="empty"><b>No season running yet</b>${S.error ? esc(S.error) : 'Check back soon.'}</div>`;
+  else if (!S.season && S.tab !== 'rules') v.innerHTML = `<div class="empty"><b>MMA Survivor opens soon</b>${S.error ? esc(S.error) : 'Check back soon.'}</div>`;
   else v.innerHTML = S.tab === 'season' ? viewSeason() : S.tab === 'board' ? viewBoard() : S.tab === 'rules' ? viewRules() : S.tab === 'admin' && S.isAdmin ? viewAdmin() : viewPick();
   $('#aside').innerHTML = S.season ? viewAside() : '';
   const lbw = $('#lbwrap'); if (lbw) lbw.scrollLeft = lbw.scrollWidth;   // newest week in view
@@ -1270,7 +1272,7 @@ function viewPick() {
   else if (fights.length && S.locked) pill = `<span class="pill live"><i></i>Live now</span>`;
   else if (Number.isFinite(lockAt) && ctx.isOpenWeek) pill = `<span class="pill gold">${I.clock}Picks lock in <span class="tnum" data-count="${new Date(lockAt).toISOString()}">${countdown(lockAt - now())}</span></span>`;
 
-  let h = `<div class="ev-top"><span class="ev-week">Week <b>${ev?.week_no ?? '–'}</b> of ${S.season.weeks}</span>
+  let h = `<div class="ev-top"><span class="ev-week">Week <b>${ev?.week_no ?? '–'}</b></span>
     <span class="wkbtns"><button class="iconbtn" data-act="week" data-dir="-1" aria-label="Previous week" ${idx <= 0 ? 'disabled' : ''}>${I.left}</button><button class="iconbtn" data-act="week" data-dir="1" aria-label="Next week" ${idx < 0 || idx >= weeks.length - 1 ? 'disabled' : ''}>${I.right}</button></span></div>
     <h1 class="ev-title c">${esc(t.main || 'Card TBA')}</h1>
     <div class="ev-meta"><span>${esc(t.pre || 'UFC')}</span>${ev ? `<span>${esc(fmtDay(ev.starts_at))}</span>` : ''}${ev?.location ? `<span>${esc(ev.location.split(',')[0])}</span>` : ''}${pill}</div>`;
@@ -1280,7 +1282,7 @@ function viewPick() {
 
   if (!S.me) h += `<div class="welcome"><p><b>Pick one fighter. Win and your streak grows.</b>Free to play. Pick a winner every UFC card. Lose and you're straight back in next week.</p><button class="btn btn-dark" data-act="auth" data-mode="up">Play free</button></div>`;
   else if (!S.me.profile) h += `<div class="welcome"><p><b>Choose a username</b>You'll show up on the leaderboard with it.</p><button class="btn btn-dark" data-act="profile">Create profile</button></div>`;
-  else if (S.season.status === 'complete' && S.entry?.status !== 'alive') h += `<div class="welcome"><p><b>This season is over</b>The next season opens soon.</p></div>`;
+  else if (S.season.status === 'complete' && S.entry?.status !== 'alive') h += `<div class="welcome"><p><b>No card open right now</b>The next UFC card opens soon.</p></div>`;
   else if (!future) h += statusHTML(ctx, lockAt);
 
   if (!ev) return h + `<div class="empty"><b>No card yet</b>The next UFC event shows up here once it's announced.</div>`;
@@ -1432,9 +1434,9 @@ function renderSheet() {
 
 /* ---------- MY SEASON ---------- */
 function viewSeason() {
-  if (!S.me?.profile) return `<h1 class="h1 c">My season</h1><div class="empty"><b>Not playing yet</b>Create a free profile and make your first pick.<div style="margin-top:14px"><button class="btn btn-dark" data-act="${S.me ? 'profile' : 'auth'}" data-mode="up">${S.me ? 'Create profile' : 'Play free'}</button></div></div>`;
+  if (!S.me?.profile) return `<h1 class="h1 c">My streak</h1><div class="empty"><b>Not playing yet</b>Create a free profile and make your first pick.<div style="margin-top:14px"><button class="btn btn-dark" data-act="${S.me ? 'profile' : 'auth'}" data-mode="up">${S.me ? 'Create profile' : 'Play free'}</button></div></div>`;
   const prof = S.me.profile, e = S.entry;
-  if (!e) return `<h1 class="h1 c">My season</h1><div class="empty"><b>No picks yet</b>Pick any fighter on this week's card to start your streak.<div style="margin-top:14px"><button class="btn btn-dark" data-act="gopick">Make my pick</button></div></div>`;
+  if (!e) return `<h1 class="h1 c">My streak</h1><div class="empty"><b>No picks yet</b>Pick any fighter on this week's card to start your streak.<div style="margin-top:14px"><button class="btn btn-dark" data-act="gopick">Make my pick</button></div></div>`;
   const alive = e.status === 'alive', cur = alive ? e.wins : 0;
   const best = S.entries.reduce((m, x) => Math.max(m, x.wins), 0);
   const tiers = S.prizes.filter((p) => p.wins > 0).sort((a, b) => a.wins - b.wins);
@@ -1505,7 +1507,7 @@ function viewBoard() {
       ${S.lb.rows.map((r) => lrowHTML(r, weeks)).join('')}</div></div>`;
   } else h += `<div class="empty" style="margin:0;border:0">${S.lb.filter === 'following' ? "You're not following anyone yet. Tap a player to see their profile and follow them." : S.lb.q ? 'No players match.' : 'No players yet. Be the first on the board.'}</div>`;
   if (S.lb.rows.length < S.lb.total) h += `<div class="more"><button class="btn btn-ghost btn-sm" data-act="lbmore">Show more</button></div>`;
-  return h + `</div><details class="fine"><summary>How ranking works</summary><p>Ranked by your best streak this season: the most wins in a row. Players with the same best streak share a rank. Lose and your streak resets, but you can start a new one the next week. Green is a win, red is a loss. Picks stay hidden until the card starts. Tap any player to see their profile.</p></details>`;
+  return h + `</div><details class="fine"><summary>How ranking works</summary><p>Ranked by your best streak: the most wins in a row. Players with the same best streak share a rank. Lose and your streak resets, but you can start a new one the next week. Green is a win, red is a loss. Picks stay hidden until the card starts. Tap any player to see their profile.</p></details>`;
 }
 
 /* ---------- PLAYER PROFILE ---------- */
@@ -1670,7 +1672,7 @@ function adminWeeksHTML() {
   if (!A) return `<div class="box"><h3 class="c">Week by week</h3><p class="muted">Adding up every week…</p></div>`;
   if (!A.weeks.length) return `<div class="box"><h3 class="c">Week by week</h3><p>No weeks played yet.</p></div>`;
   const s = A.season, sel = A.weeks.find((x) => x.week === S.admin.week) || A.weeks.find((x) => x.week === A.open && x.played) || [...A.weeks].reverse().find((x) => x.played) || A.weeks[A.weeks.length - 1];
-  let h = `<div class="box"><h3 class="c">Season so far</h3><div class="mini">${[
+  let h = `<div class="box"><h3 class="c">So far</h3><div class="mini">${[
     [s.playedEver, 'Played at least once'], [s.picks, 'Picks made'], [s.winRate != null ? s.winRate + '%' : '–', 'Picks that won'],
     [s.restarts, 'Came back after a loss'], [s.best, 'Best streak'], [s.avgPlayed, 'Players a week (avg)']
   ].map(([v, l]) => `<div><b class="tnum">${typeof v === 'string' ? v : fmtN(v)}</b><small>${l}</small></div>`).join('')}</div></div>`;
@@ -1688,7 +1690,7 @@ function adminWeeksHTML() {
   if (A.ladder.length) {
     const max = Math.max(...A.ladder.map((x) => x[1]));
     h += `<div class="box"><h3 class="c">Streaks right now</h3><div class="split">${A.ladder.map(([w, c]) => `<div class="srow ladder"><span class="tnum lw">${w}</span><span>${w ? `${plural(w, 'win')} in a row` : 'Waiting on first result'}</span><span class="tnum" style="text-align:right">${fmtN(c)}</span><span class="bar2"><i style="width:${Math.max(2, 100 * c / max)}%"></i></span></div>`).join('')}</div>
-      <div class="sub3">Hit a streak this season</div><div class="mini">${A.milestones.map(([m, c]) => `<div><b class="tnum">${fmtN(c)}</b><small>${m} in a row</small></div>`).join('')}</div></div>`;
+      <div class="sub3">Hit a streak</div><div class="mini">${A.milestones.map(([m, c]) => `<div><b class="tnum">${fmtN(c)}</b><small>${m} in a row</small></div>`).join('')}</div></div>`;
   }
   return h;
 }
@@ -1739,26 +1741,8 @@ function adminFightersCSV() {
 /* ---------- RULES ---------- */
 // A prize with no text in prize_tiers is not announced yet: show a teaser instead.
 const prizeText = (p) => (p && typeof p.prize === 'string' && p.prize.trim()) ? p.prize.trim() : null;
-function viewRules() {
-  const tiers = S.prizes.filter((p) => p.wins > 0).sort((a, b) => a.wins - b.wins), champ = S.prizes.find((p) => p.wins === 0);
-  const first = tiers[0];
-  return `<h1 class="h1 c">How it works</h1><p class="lead">${esc(S.season.name)} runs for ${S.season.weeks} UFC events. Build the longest streak you can.</p>
-  <div class="prizes">${[...tiers, champ].some((p) => p && !prizeText(p)) ? `<div class="tease"><b>Prizes start at ${first ? first.wins : 10} in a row 👀</b><span>We're cooking something big. Hit a ${first ? first.wins : 10}-fight streak to unlock the first prize, then keep going for more.</span></div>` : ''}
-  ${tiers.map((t) => `<div class="prize"><span class="n c tnum">${t.wins}<small>in a row</small></span><span>${t.title && t.title.toLowerCase() !== `${t.wins} in a row` ? `<b>${esc(t.title)}</b>` : `<b>${t.wins}-fight streak</b>`}${prizeText(t) ? `<span>${esc(prizeText(t))}</span>` : `<span class="soon">${I.lock}Revealed soon</span>`}</span></div>`).join('')}
-  ${champ ? `<div class="prize champ"><span class="n c">#1</span><span><b>${esc(champ.title)}</b><span>${prizeText(champ) ? `${esc(prizeText(champ))}. ` : '<span class="soon">Revealed soon.</span> '}Longest streak of the season.</span></span></div>` : ''}</div>
-  <h2 class="h2 c">Rules</h2>
-  <ul class="rules">
-    <li><b>Pick one fighter every UFC card</b> to win. Any fight on the card counts.</li>
-    <li><b>Win and your streak grows.</b> Lose and it resets to 0.</li>
-    <li><b>Lost? You're straight back in.</b> Make next week's pick and a new streak starts. Join any week.</li>
-    <li><b>The leaderboard ranks your best streak</b> this season. Players with the same best streak share a rank.</li>
-    <li><b>Picks lock when the first fight starts</b>, early prelims included. Change your pick as often as you like before then. No pick by then and your streak ends.</li>
-    <li><b>Picks are secret</b> until the card starts. Then everyone's pick shows on the leaderboard.</li>
-    <li><b>Hit 3 in a row</b> and we'll ask for your phone number so we can reach you about prizes. You need it to keep your streak going.</li>
-    <li><b>Win %</b> next to each fighter is their chance to win based on the betting odds. It updates until the card starts.</li>
-    <li><b>Draw, no contest or cancelled fight</b> counts as a loss. Your fighter has to win. If your fight is cancelled before lock, switch your pick.</li>
-  </ul>
-  <details class="fine"><summary>Fine print</summary><p>Prizes and how they are awarded will be announced by Home of Fight before anything is given out. Each milestone counts once per player. Results come from ESPN and are graded automatically; corrections within 72 hours are applied, then results are final. If the UFC cancels a whole event, that week doesn't count. Phone numbers are only used by Home of Fight to contact you about the game and prizes. Profile photos must be of you or something you have the right to use; Home of Fight can remove any photo. Free to play, no purchase necessary. One account per person; duplicate accounts are disqualified. You must be 18 or older to receive a prize, and Home of Fight may verify identity before awarding one. Home of Fight's decisions are final. Not affiliated with the UFC or ESPN.</p></details>`;
+function viewRules() { /* hof-official-rules */
+  return `<div class="hofrules"><h1 class="h1 c">How it works</h1><p class="lead">Pick one fighter to win on every UFC card and build the longest win streak you can. Prizes start at 5 wins in a row.</p><h2 class="h2 c">How to play</h2><ul class="rules"><li><b>One pick per UFC card.</b> Any fight on the card counts, from the main event to the early prelims.</li><li><b>Win and your streak grows by 1.</b> Lose and it resets to 0.</li><li><b>Your fighter has to win.</b> A draw, no contest or cancelled fight counts as a loss.</li><li><b>Any fighter, any week,</b> including one you picked before.</li><li><b>Win %</b> next to each fighter is his chance to win, based on the betting odds. It updates until the card starts.</li><li><b>Free to play.</b> Join any week.</li></ul><h2 class="h2 c">Picks and lock</h2><p class="rp">Picks lock when the first fight of the card starts, early prelims included.</p><ul class="rules"><li><b>Change your pick as often as you like</b> before lock.</li><li><b>No pick by lock and your streak ends.</b></li><li><b>Picks are secret until the card starts.</b> After that, everyone's pick shows on the leaderboard.</li><li><b>Bout cancelled before lock?</b> Switch your pick. If your fighter gets a new opponent on the same card, your pick moves with him automatically.</li><li><b>Whole event cancelled by the UFC?</b> That week doesn't count for anyone.</li></ul><h2 class="h2 c">Your streak never expires</h2><p class="rp">There are no seasons. Your streak carries on from one UFC card to the next until you lose, miss a pick or take a deal.</p><ul class="rules"><li><b>Lost? You're straight back in.</b> Make next week's pick and a new streak starts at 0.</li><li><b>Start over as many times as you like.</b></li></ul><h2 class="h2 c">Phone number</h2><p class="rp">At 3 wins in a row you must add your phone number to keep your streak going. Home of Fight uses it only to contact you about the game and to reach you when you win a prize.</p><h2 class="h2 c">Prizes: 5 to 35 wins</h2><p class="rp">Every 5 wins in a row unlocks a prize. Up to 35 wins, you get each prize when you reach it and keep playing.</p><div class="prizes"><div class="prize"><span class="n c tnum">5<small>in a row</small></span><span><b>Store credit for UFC cards</b><span>$25 value</span></span></div><div class="prize"><span class="n c tnum">10<small>in a row</small></span><span><b>PSA-graded UFC card</b><span>$60 value</span></span></div><div class="prize"><span class="n c tnum">15<small>in a row</small></span><span><b>PSA-graded UFC card</b><span>$150 value</span></span></div><div class="prize"><span class="n c tnum">20<small>in a row</small></span><span><b>Credit on Novig</b><span>$250 value</span></span></div><div class="prize"><span class="n c tnum">25<small>in a row</small></span><span><b>One year of HOF Picks, free</b><span>$990 value</span></span></div><div class="prize"><span class="n c tnum">30<small>in a row</small></span><span><b>Signed memorabilia bundle</b><span>$1,500 value</span></span></div><div class="prize"><span class="n c tnum">35<small>in a row</small></span><span><b>Signed memorabilia bundle</b><span>$1,500 value</span></span></div></div><h2 class="h2 c">Deal or No Deal: 40 wins and up</h2><p class="rp">From 40 wins, every new prize is Deal or No Deal: take it and your run ends, or turn it down and keep going for a bigger one.</p><ul class="rules"><li><b>At 40 wins, and every 5 wins after that,</b> Home of Fight contacts you and you choose before picks lock for the next card.</li><li><b>Deal:</b> take that level's prize. Your streak ends there, and you can start a new one the next week.</li><li><b>No Deal:</b> turn it down and keep your streak going for the next prize. Lose before you reach it and you get nothing from the Deal or No Deal levels.</li><li><b>Prizes you won from 5 to 35 wins are yours either way.</b></li></ul><div class="prizes"><div class="prize"><span class="n c tnum">40<small>in a row</small></span><span><b>2 UFC tickets</b></span></div><div class="prize"><span class="n c tnum">45<small>in a row</small></span><span><b>2 UFC tickets + hotel covered</b></span></div><div class="prize"><span class="n c tnum">50<small>in a row</small></span><span><b>$5,000</b></span></div><div class="prize"><span class="n c tnum">55<small>in a row</small></span><span><b>$10,000</b></span></div><div class="prize"><span class="n c tnum">60<small>in a row</small></span><span><b>2027 Tesla Model 3</b></span></div><div class="prize"><span class="n c tnum">65<small>in a row</small></span><span><b>2027 Tesla Model Y</b></span></div><div class="prize champ"><span class="n c tnum">70<small>in a row</small></span><span><b>2027 Tesla Cybertruck</b><span>Top prize</span></span></div></div><h2 class="h2 c">Leaderboard</h2><p class="rp">The leaderboard ranks players by their best streak. Players with the same best streak share a rank.</p><h2 class="h2 c">Fine print</h2><ul class="rules"><li>Each prize level can be won once per player.</li><li>Results come from ESPN and are graded automatically. Corrections made within 72 hours are applied; after that, results are final.</li><li>Home of Fight contacts winners using the phone number on their account.</li><li>Prize values are approximate.</li><li>Winners are responsible for any taxes. Prizes worth $600 or more need a tax form before they are sent.</li><li>The Novig prize follows Novig's own rules on age and location.</li><li>You must be 18 or older to receive a prize, and Home of Fight may verify your identity first.</li><li>One account per person. Duplicate accounts are disqualified.</li><li>Profile photos must be of you or something you have the right to use. Home of Fight can remove any photo.</li><li>Free to play. No purchase necessary.</li><li>Home of Fight's decisions are final.</li><li>Not affiliated with the UFC, ESPN, PSA, Novig or Tesla.</li></ul><h2 class="h2 c">Who runs MMA Survivor</h2><p class="rp">MMA Survivor is run by Home of Fight Inc., Florida, United States. Questions: support@homeoffight.com. Apple and Google are not sponsors of MMA Survivor and are not involved with it in any way.</p><p class="rp small">Last updated 10 November 2026.</p></div>`;
 }
 
 /* ---------- SIDE PANEL (desktop) ---------- */
@@ -1767,7 +1751,7 @@ function viewAside() {
   if (S.me?.profile) {
     const e = S.entry, p = S.openEvent && pickFor(S.openEvent.id), alive = e?.status === 'alive';
     const sub = !e ? 'Make your first pick' : !alive ? 'Streak ended. Make a pick to start again' : p ? `This week: ${esc(lastName(p.fighter))}` : e.start_week > (S.openEvent?.week_no ?? 0) ? `Starts week ${e.start_week}` : 'No pick yet this week';
-    h += `<div class="panel"><h3 class="c">My season <button data-act="tab" data-tab="season">Details</button></h3>
+    h += `<div class="panel"><h3 class="c">My streak <button data-act="tab" data-tab="season">Details</button></h3>
       <div class="prow">${avatarHTML(S.me.profile.avatar_url, S.me.profile.username, 'm')}<span class="t">${esc(S.me.profile.username)}<small>${sub}</small></span><span class="w c tnum" title="Current streak">${alive ? e.wins : 0}</span></div></div>`;
   }
   const st = S.stats || { alive: 0, players: 0 };
